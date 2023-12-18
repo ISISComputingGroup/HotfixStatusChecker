@@ -37,8 +37,9 @@ pipeline {
         }
     }
 
-    post {
-         logParser ([
+   post {
+    always {
+        logParser ([
             projectRulePath: 'parse_rules',
             parsingRulesPath: '',
             showGraphs: true, 
@@ -46,4 +47,5 @@ pipeline {
             useProjectRule: true,
         ])
     }
+
 }
