@@ -32,7 +32,7 @@ def check_instrument(hostname):
     print(f'Checking {hostname}')
     # connect to instrument/ get instrument branch details via it auto-pushing to get uncommitted changes
     # check if any hotfix commits on the branch hostname on, dont clone repo do this
-    response = requests.get(f"{REMOTE_URL}/commits?sha={hostname}")
+    response = requests.get(f"{REMOTE_URL}/commits/{hostname}")
 
     if response.status_code == 200:
         commits = response.json()
