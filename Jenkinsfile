@@ -37,15 +37,16 @@ pipeline {
         }
     }
 
-   post {
-    always {
-        logParser ([
-            projectRulePath: 'parse_rules',
-            parsingRulesPath: '',
-            showGraphs: true, 
-            unstableOnWarning: true,
-            useProjectRule: true,
-        ])
+    post {
+        always {
+            logParser ([
+                projectRulePath: 'parse_rules',
+                parsingRulesPath: '',
+                showGraphs: true, 
+                unstableOnWarning: true,
+                useProjectRule: true,
+            ])
+        }
     }
 
 }
