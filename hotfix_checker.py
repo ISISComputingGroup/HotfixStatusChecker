@@ -25,6 +25,7 @@ class hotfix_status(Enum):
 instrument_no_hotfix = {}
 instrument_hotfix_detected = {}
 instrument_uncommitted_changes = {}
+unreachable_instruments = []
 
 
 def check_instrument(hostname):
@@ -45,6 +46,7 @@ def check_instrument(hostname):
             instrument_no_hotfix[hostname] = hotfix_status.NONE
     else:
         print(f"ERROR: Failed to retrieve information. Status code: {response.status_code}")
+        unreachable_instruments.append(hostname)
 
 
     # check if any uncommitted changes
@@ -61,11 +63,13 @@ def check_all_scripts(instruments):
 # Manual running (for the time being)
 check_all_scripts(instruments)
 
+print("INFO: 0 hotfixes detected on: " + str(instrument_no_hotfix))
+print("INFO: 1+ hotfixes detected on: " + str(instrument_hotfix_detected))
+
 # check if any instrument in hotfix_status_each_instrument has uncommitted changes
-if len(instrument_uncommitted_changes) > 0:
-    print("INFO: 0 hotfixes detected on: " + str(instrument_no_hotfix))
-    print("INFO: 1+ Hotfixes detected on: " + str(instrument_hotfix_detected))
-    # print("INFO: Uncommitted changes detected on: " + str(instrument_uncommitted_changes))
+if len(instrument_uncommitted_changes) > 0 or len(unreachable_instruments) > 0: 
+    print("INFO: Uncommitted changes detected on: " + str(instrument_uncommitted_changes))
+    print("INFO: Unreachable instruments: " + str(unreachable_instruments))
     sys.exit(1)
 else:
     sys.exit(0)
