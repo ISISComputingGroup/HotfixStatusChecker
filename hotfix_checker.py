@@ -32,7 +32,7 @@ def check_instrument(hostname):
     print(f'Checking {hostname}')
     # connect to instrument/ get instrument branch details via it auto-pushing to get uncommitted changes
     # check if any hotfix commits on the branch hostname on, dont clone repo do this
-    response = requests.get(f"{REMOTE_URL}/commits/{hostname}")
+    response = requests.get(f"{REMOTE_URL}/commits/{hostname}.git")
 
     if response.status_code == 200:
         commits = response.json()
@@ -46,6 +46,7 @@ def check_instrument(hostname):
             instrument_no_hotfix[hostname] = hotfix_status.NONE
     else:
         print(f"ERROR: Failed to retrieve information. Status code: {response.status_code}")
+        print(f"Trying to reach {REMOTE_URL}/commits/{hostname}")
         unreachable_instruments.append(hostname)
 
 
