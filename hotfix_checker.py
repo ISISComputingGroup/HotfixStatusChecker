@@ -71,11 +71,10 @@ def check_all_scripts(instruments):
 # Manual running (for the time being)
 check_all_scripts(instruments)
 
-if len(instrument_hotfix_detected) > 0:
-    print("INFO: NO HOTFIXES detected on: " + str(instrument_no_hotfix))
+print("INFO: NO HOTFIXES detected on: " + str(instrument_no_hotfix))
 print("INFO: 1+ HOTFIXES detected on: " + str(instrument_hotfix_detected))
 
-# check if any instrument in hotfix_status_each_instrument has uncommitted changes
+# check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
 if len(instrument_uncommitted_changes) > 0 or len(unreachable_instruments) > 0: 
     print("ERROR: Uncommitted changes detected on: " + str(instrument_uncommitted_changes))
     print("ERROR: Unreachable instruments: " + str(unreachable_instruments))
