@@ -16,13 +16,20 @@ else:
     # make list just the ['name'] part with 'NDX' in-front of it
     instruments = ["NDX" + instrument['name'] for instrument in instruments] 
 
-instruments = ['testBranchForHotfixChecker']
+instruments = ['test_branch_for_hotfix_checker']
 
 
 instrument_no_hotfix = []
 instrument_hotfix_detected = []
 instrument_uncommitted_changes = []
 unreachable_instruments = []
+
+def check_for_uncommitted_changes(hostname):
+    # ssh into instrument
+    # check for uncommitted changes
+    # if uncommitted changes, add to list
+    # disconnect from instrument
+    pass
 
 
 def check_instrument(hostname):
@@ -51,14 +58,8 @@ def check_instrument(hostname):
 
 
     # check if any uncommitted changes run on each instrument
-        
-    # if repo.is_dirty():
-    #     print(f"The branch '{hostname}' has uncommitted changes.")
-    #     instrument_uncommitted_changes.append(hostname)
-    # else:
-    #     print(f"The branch '{hostname}' has no uncommitted changes.") 
-    # record details of both
-    # disconnect from instrument
+    check_for_uncommitted_changes(hostname)
+
 
 
 def check_all_scripts(instruments):
@@ -70,7 +71,8 @@ def check_all_scripts(instruments):
 # Manual running (for the time being)
 check_all_scripts(instruments)
 
-print("INFO: NO HOTFIXES detected on: " + str(instrument_no_hotfix))
+if len(instrument_hotfix_detected) > 0:
+    print("INFO: NO HOTFIXES detected on: " + str(instrument_no_hotfix))
 print("INFO: 1+ HOTFIXES detected on: " + str(instrument_hotfix_detected))
 
 # check if any instrument in hotfix_status_each_instrument has uncommitted changes
