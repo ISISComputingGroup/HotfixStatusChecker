@@ -18,15 +18,10 @@ else:
 
 instruments = ['testBranchForHotfixChecker']
 
-class hotfix_status(Enum):
-    NONE = 0
-    HOTFIX_DETECTED = 1
-    UNCOMMITTED_CHANGES = 2
 
-
-instrument_no_hotfix = {}
-instrument_hotfix_detected = {}
-instrument_uncommitted_changes = {}
+instrument_no_hotfix = []
+instrument_hotfix_detected = []
+instrument_uncommitted_changes = []
 unreachable_instruments = []
 
 
@@ -49,13 +44,19 @@ def check_instrument(hostname):
 
     if len(commits) > 0:
         print(f"The branch '{hostname}' has hotfix commits.")
-        instrument_hotfix_detected[hostname] = hotfix_status.HOTFIX_DETECTED
+        instrument_hotfix_detected.append(hostname)
     else:
         print(f"The branch '{hostname}' has no hotfix commits.")
-        instrument_no_hotfix[hostname] = hotfix_status.NONE
+        instrument_no_hotfix.append(hostname)
 
 
-    # check if any uncommitted changes
+    # check if any uncommitted changes run on each instrument
+        
+    # if repo.is_dirty():
+    #     print(f"The branch '{hostname}' has uncommitted changes.")
+    #     instrument_uncommitted_changes.append(hostname)
+    # else:
+    #     print(f"The branch '{hostname}' has no uncommitted changes.") 
     # record details of both
     # disconnect from instrument
 
