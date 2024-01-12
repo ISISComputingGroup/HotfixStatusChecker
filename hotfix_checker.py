@@ -48,7 +48,7 @@ def check_instrument(hostname):
     repo.git.pull()
 
     commits = list(repo.iter_commits('HEAD', max_count=1))
-
+    print(commits)
     if len(commits) > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
         instrument_hotfix_detected.append(hostname)
