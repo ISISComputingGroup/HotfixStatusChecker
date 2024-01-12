@@ -46,7 +46,7 @@ def check_instrument(hostname):
             instrument_no_hotfix[hostname] = hotfix_status.NONE
     else:
         print(f"ERROR: Failed to retrieve information. Status code: {response.status_code}")
-        print(f"Trying to reach {REMOTE_URL}/commits/{hostname}")
+        print(f"Trying to reach {REMOTE_URL}/commits/{hostname}.git")
         unreachable_instruments.append(hostname)
 
 
