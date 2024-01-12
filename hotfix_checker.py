@@ -1,10 +1,12 @@
+import os
 import sys
 import git
 from util.channel_access import ChannelAccessUtils
 from enum import Enum
-import requests
 
 
+
+EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
 
 instruments = ChannelAccessUtils().get_inst_list()
@@ -31,23 +33,26 @@ unreachable_instruments = []
 def check_instrument(hostname):
     print(f'Checking {hostname}')
     # connect to instrument/ get instrument branch details via it auto-pushing to get uncommitted changes
-    # check if any hotfix commits on the branch hostname on, dont clone repo do this
-    response = requests.get(f"{REMOTE_URL}/commits/{hostname}.git")
+    # set repo from file path
 
-    if response.status_code == 200:
-        commits = response.json()
-
-        if len(commits) > 0:
-            print(f"The branch '{hostname}' has hotfix commits.")
-            instrument_hotfix_detected[hostname] = hotfix_status.HOTFIX_DETECTED
-
-        else:
-            print(f"The branch '{hostname}' has no hotfix commits.")
-            instrument_no_hotfix[hostname] = hotfix_status.NONE
-    else:
-        print(f"ERROR: Failed to retrieve information. Status code: {response.status_code}")
-        print(f"Trying to reach {REMOTE_URL}/commits/{hostname}.git")
+    repo = git.Repo(EPICS_DIR)
+    try:
+        repo.git.checkout(hostname)
+    except git.GitCommandError:
+        print(f"Could not checkout branch '{hostname}'")
         unreachable_instruments.append(hostname)
+        return
+    
+    repo.git.pull()
+
+    commits = list(repo.iter_commits('HEAD', max_count=1))
+
+    if len(commits) > 0:
+        print(f"The branch '{hostname}' has hotfix commits.")
+        instrument_hotfix_detected[hostname] = hotfix_status.HOTFIX_DETECTED
+    else:
+        print(f"The branch '{hostname}' has no hotfix commits.")
+        instrument_no_hotfix[hostname] = hotfix_status.NONE
 
 
     # check if any uncommitted changes

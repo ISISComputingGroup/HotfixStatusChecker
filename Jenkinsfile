@@ -13,6 +13,10 @@ pipeline {
         cron('H * * * *')
     }
   
+    environment {
+        EPICS_DIR = "C:/HotfixStatusChecker/EPICS"
+    }
+  
     stages {  
 
         stage("Checkout") {
