@@ -16,7 +16,7 @@ else:
     # make list just the ['name'] part with 'NDX' in-front of it
     instruments = ["NDX" + instrument['name'] for instrument in instruments] 
 
-instruments = ['test_branch_for_hotfix_checker']
+instruments = ['test_branch_for_hotfix_checker', 'test_branch_2_for_hotfix_checker@']
 
 
 instrument_no_hotfix = []
