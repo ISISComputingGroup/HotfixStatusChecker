@@ -16,7 +16,7 @@ else:
     # make list just the ['name'] part with 'NDX' in-front of it
     instruments = ["NDX" + instrument['name'] for instrument in instruments] 
 
-instruments = ['test_branch_for_hotfix_checker', 'test_branch_2_for_hotfix_checker@']
+instruments = ['test_branch_with_no_commits', 'test_branch_with_1_commit']
 
 
 instrument_no_hotfix = []
@@ -49,7 +49,8 @@ def check_instrument(hostname):
 
     commits = list(repo.iter_commits('HEAD', max_count=1))
     print(commits)
-    if len(commits) > 0:
+    # initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
+    if len(commits) > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
         instrument_hotfix_detected.append(hostname)
     else:
