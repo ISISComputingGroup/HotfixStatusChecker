@@ -50,7 +50,7 @@ def check_instrument(hostname):
     commits = repo.git.rev_list('--count', hostname)
     print(commits)
     # initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
-    if len(commits) > 1:
+    if commits > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
         instrument_hotfix_detected.append(hostname)
     else:
