@@ -47,7 +47,7 @@ def check_instrument(hostname):
     
     repo.git.pull()
 
-    commits = list(repo.iter_commits('HEAD', max_count=1))
+    commits = repo.git.rev_list('--count', hostname)
     print(commits)
     # initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
     if len(commits) > 1:
