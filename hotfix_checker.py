@@ -61,6 +61,9 @@ unreachable_instruments = []
 #         ssh.close()
 
 def check_for_uncommitted_changes(hostname):
+    print(f"Checking for uncommitted changes on {hostname}")
+    print("Username is: " + SSH_USERNAME)
+    print("Password is: " + SSH_PASSWORD)
     # Command to run, including the 'git status' command
     command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status"
 
