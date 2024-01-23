@@ -62,9 +62,11 @@ unreachable_instruments = []
 
 def check_for_uncommitted_changes(hostname):
     try:
+        print("Before subprocess command")
         # Use subprocess to run the necessary commands over SSH
-        ssh_command = f'ssh {SSH_USERNAME}@{hostname} "cd C:\\Instrument\\Apps\\EPICS\\ && git status"'
-        ssh_process = subprocess.run(ssh_command, input=SSH_PASSWORD, text=True, capture_output=True, shell=True)
+        # ssh_command = f'ssh {SSH_USERNAME}@{hostname} '
+        ssh_process = subprocess.run(['ssh', f'{SSH_USERNAME}@{hostname}', 'cd C:\\Instrument\\Apps\\EPICS\\', 'git status'], capture_output=True, text=True)
+        print("After subprocess command")
 
         # Check if the SSH command was successful
         if ssh_process.returncode == 0:
