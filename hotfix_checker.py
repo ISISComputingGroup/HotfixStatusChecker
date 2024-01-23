@@ -62,10 +62,12 @@ unreachable_instruments = []
 
 def check_for_uncommitted_changes(hostname):
     try:
-        # Use subprocess to run the 'git status' command over SSH
-        command = f'ssh {SSH_USERNAME}@{hostname} "cd C:\\Instrument\\Apps\\EPICS\\ && git status"'
-        output = subprocess.check_output(command, shell=True, universal_newlines=True)
-
+        # Use subprocess to run the 'git status' command over SSH and type in password as well uisng normal ssh command
+        subprocess.run(f'ssh {SSH_USERNAME}@{hostname}', shell=True)
+        subprocess.run(f'{SSH_PASSWORD}', shell=True)
+        subprocess.run('cd C:\\Instrument\\Apps\\EPICS\\', shell=True)
+        output = subprocess.run('git status', shell=True, capture_output=True).stdout.decode('utf-8')
+                       
         # Check if there are any uncommitted changes
         if "nothing to commit, working tree clean" not in output:
             print(f"Uncommitted changes detected on {hostname}")
