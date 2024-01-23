@@ -14,7 +14,9 @@ pipeline {
     }
   
     environment {
-        EPICS_DIR = "C:/HotfixStatusChecker/EPICS"
+        EPICS_DIR = "C:/HotfixStatusChecker/EPICS",
+        SSH_USERNAME = ${SSH_USERNAME},
+        SSH_PASSWORD = ${SSH_PASSWORD},
     }
   
     stages {  

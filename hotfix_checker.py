@@ -2,12 +2,14 @@ import os
 import sys
 import git
 from util.channel_access import ChannelAccessUtils
-from enum import Enum
-
-
+import paramiko
 
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
+
+# get the inst username and pw from Jenkins paramters
+SSH_USERNAME = os.environ['SSH_USERNAME']
+SSH_PASSWORD = os.environ['SSH_PASSWORD']
 
 instruments = ChannelAccessUtils().get_inst_list()
 if len(instruments) == 0:
@@ -16,7 +18,7 @@ else:
     # make list just the ['name'] part with 'NDX' in-front of it
     instruments = ["NDX" + instrument['name'] for instrument in instruments] 
 
-instruments = ['test_branch_with_no_commits', 'test_branch_with_1_commit']
+instruments = ['NDXSCIDEMO']
 
 
 instrument_no_hotfix = []
@@ -24,13 +26,37 @@ instrument_hotfix_detected = []
 instrument_uncommitted_changes = []
 unreachable_instruments = []
 
-def check_for_uncommitted_changes(hostname):
-    # ssh into instrument
-    # check for uncommitted changes
-    # if uncommitted changes, add to list
-    # disconnect from instrument
-    pass
 
+def check_for_uncommitted_changes(hostname):
+    ssh = paramiko.SSHClient()
+
+    # Automatically add the server's host key
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Connect to the remote machine via file
+        ssh.connect(hostname, username=SSH_USERNAME, password=SSH_PASSWORD)
+
+        # Change to the EPICS directory
+        ssh.exec_command("cd C:\\Instrument\\Apps\\EPICS\\")
+
+        # Run the 'git status' command
+        stdin, stdout, stderr = ssh.exec_command('git status')
+
+        # Get the output of the command
+        output = stdout.read().decode('utf-8')
+
+        # Check if there are any uncommitted changes
+        if "nothing to commit, working tree clean" not in output:
+            print(f"Uncommitted changes detected on {hostname}")
+            instrument_uncommitted_changes.append(hostname)
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+    finally:
+        # Close the SSH connection
+        ssh.close()
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
@@ -60,6 +86,7 @@ def check_instrument(hostname):
 
     # check if any uncommitted changes run on each instrument
     check_for_uncommitted_changes(hostname)
+
 
 
 
