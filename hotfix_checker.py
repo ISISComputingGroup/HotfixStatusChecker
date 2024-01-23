@@ -72,8 +72,7 @@ def check_for_uncommitted_changes(hostname):
                                 text=True)
 
     # Provide the password as input to the process
-    password = "your_password"
-    stdout, stderr = ssh_process.communicate(input=f"{password}\n")
+    stdout, stderr = ssh_process.communicate(input=f"{SSH_PASSWORD}\n")
 
     # Check the result
     if ssh_process.returncode == 0:
