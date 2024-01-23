@@ -61,26 +61,26 @@ unreachable_instruments = []
 #         ssh.close()
 
 def check_for_uncommitted_changes(hostname):
-    try:
-        print("Before subprocess command")
-        # Use subprocess to run the necessary commands over SSH
-        # ssh_command = f'ssh {SSH_USERNAME}@{hostname} '
-        ssh_process = subprocess.run(['ssh', f'{SSH_USERNAME}@{hostname}', 'cd C:\\Instrument\\Apps\\EPICS\\', 'git status'], capture_output=True, text=True)
-        print("After subprocess command")
+    # Command to run, including the 'git status' command
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status"
 
-        # Check if the SSH command was successful
-        if ssh_process.returncode == 0:
-            output = ssh_process.stdout
+    # Run the ssh command with password input
+    ssh_process = subprocess.Popen(['ssh', f'{SSH_USERNAME}@{hostname}', command],
+                                stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                text=True)
 
-            # Check if there are any uncommitted changes
-            if "nothing to commit, working tree clean" not in output:
-                print(f"Uncommitted changes detected on {hostname}")
-                instrument_uncommitted_changes.append(hostname)
-        else:
-            print(f"Error: {ssh_process.stderr}")
+    # Provide the password as input to the process
+    password = "your_password"
+    stdout, stderr = ssh_process.communicate(input=f"{password}\n")
 
-    except Exception as e:
-        print(f"Error: {e}")
+    # Check the result
+    if ssh_process.returncode == 0:
+        print("Command executed successfully")
+        print("Output:", stdout)
+    else:
+        print("Error:", stderr)
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
