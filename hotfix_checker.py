@@ -1,7 +1,9 @@
 import os
+import subprocess
 import sys
 import git
 from util.channel_access import ChannelAccessUtils
+# make sure paramiko is installed on the machine running this script
 import paramiko
 
 EPICS_DIR = os.environ['EPICS_DIR']
@@ -27,36 +29,50 @@ instrument_uncommitted_changes = []
 unreachable_instruments = []
 
 
+# def check_for_uncommitted_changes(hostname):
+#     ssh = paramiko.SSHClient()
+
+#     # Automatically add the server's host key
+#     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+#     try:
+#         # Connect to the remote machine via file
+#         ssh.connect(hostname, username=SSH_USERNAME, password=SSH_PASSWORD)
+
+#         # Change to the EPICS directory
+#         ssh.exec_command("cd C:\\Instrument\\Apps\\EPICS\\")
+
+#         # Run the 'git status' command
+#         stdin, stdout, stderr = ssh.exec_command('git status')
+
+#         # Get the output of the command
+#         output = stdout.read().decode('utf-8')
+
+#         # Check if there are any uncommitted changes
+#         if "nothing to commit, working tree clean" not in output:
+#             print(f"Uncommitted changes detected on {hostname}")
+#             instrument_uncommitted_changes.append(hostname)
+
+#     except Exception as e:
+#         print(f"Error: {e}")
+
+#     finally:
+#         # Close the SSH connection
+#         ssh.close()
+
 def check_for_uncommitted_changes(hostname):
-    ssh = paramiko.SSHClient()
-
-    # Automatically add the server's host key
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
     try:
-        # Connect to the remote machine via file
-        ssh.connect(hostname, username=SSH_USERNAME, password=SSH_PASSWORD)
-
-        # Change to the EPICS directory
-        ssh.exec_command("cd C:\\Instrument\\Apps\\EPICS\\")
-
-        # Run the 'git status' command
-        stdin, stdout, stderr = ssh.exec_command('git status')
-
-        # Get the output of the command
-        output = stdout.read().decode('utf-8')
+        # Use subprocess to run the 'git status' command over SSH
+        command = f'ssh {SSH_USERNAME}@{hostname} "cd C:\\Instrument\\Apps\\EPICS\\ && git status"'
+        output = subprocess.check_output(command, shell=True, universal_newlines=True)
 
         # Check if there are any uncommitted changes
         if "nothing to commit, working tree clean" not in output:
             print(f"Uncommitted changes detected on {hostname}")
             instrument_uncommitted_changes.append(hostname)
 
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
-
-    finally:
-        # Close the SSH connection
-        ssh.close()
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
