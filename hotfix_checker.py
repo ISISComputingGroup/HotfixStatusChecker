@@ -4,7 +4,7 @@ import sys
 import git
 from util.channel_access import ChannelAccessUtils
 # make sure paramiko is installed on the machine running this script
-import paramiko
+# import paramiko
 
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
