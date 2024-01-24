@@ -6,8 +6,8 @@ curl -o python_installer.exe https://www.python.org/ftp/python/%PYTHON_VERSION%/
 
 :: Install Python silently
 @REM python_installer.exe /quiet InstallAllUsers=1 PrependPath=1
-python_installer.exe InstallAllUsers=1 PrependPath=1
+python_installer.exe  PrependPath=1
 
 :: Verify installation
-python --version
-pip --version
+python3 --version
+pip3 --version
