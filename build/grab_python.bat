@@ -2,7 +2,7 @@
 setlocal
 
 REM Set the source and destination paths
-set "destinationDir=C:\HotfixStatusChecker\Python3"
+set "destinationDir=C:\HotfixStatusChecker"
 
 REM Copy python3 directory
 copy /E /D "\\isis\inst$\Kits$\CompGroup\ICP\genie_python_3\BUILD-2613\Python\python3.exe" "%destinationDir%\python3.exe"
