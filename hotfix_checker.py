@@ -3,6 +3,9 @@ import subprocess
 import sys
 import git
 from util.channel_access import ChannelAccessUtils
+import socket
+from ssh.session import Session
+from ssh import options
 # make sure paramiko is installed on the machine running this script
 # import paramiko
 
@@ -60,29 +63,53 @@ unreachable_instruments = []
 #         # Close the SSH connection
 #         ssh.close()
 
+PORT = 22
+
+def runssh(host, username, password, commands):
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((host, PORT))
+
+        s = Session()
+        s.options_set(options.HOST, host)
+        s.options_set(options.USER, username)
+        s.options_set_port(PORT)
+        s.set_socket(sock)
+        s.connect()
+
+        # Authenticate with agent
+        s.userauth_password(username, password)
+
+        for command in commands:
+            print(f'Running "{command}" on {host}')
+            chan = s.channel_new()
+            chan.open_session()
+            chan.request_exec(command)
+            size, data = chan.read()
+            while size > 0:
+                print(data.strip())
+                size, data = chan.read()
+            chan.close()
+
+        s.disconnect()
+        return {'success': True, 'output': data}
+    except Exception as e:
+        print(str(e))
+        return {'success': False, 'output': str(e)}
+
 def check_for_uncommitted_changes(hostname):
-    print(f"Checking for uncommitted changes on {hostname}")
-    print("Username is: " + SSH_USERNAME)
-    print("Password is: " + SSH_PASSWORD)
-    # Command to run, including the 'git status' command
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status"
+    
+        commands = ['cd C:\\Instrument\\Apps\\EPICS\\', 'git status']
+        ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, commands)
 
-    # Run the ssh command with password input
-    ssh_process = subprocess.Popen(['ssh', f'{SSH_USERNAME}@{hostname}', command],
-                                stdin=subprocess.PIPE,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE,
-                                text=True)
-
-    # Provide the password as input to the process
-    stdout, stderr = ssh_process.communicate(input=f"{SSH_PASSWORD}\n")
-
-    # Check the result
-    if ssh_process.returncode == 0:
-        print("Command executed successfully")
-        print("Output:", stdout)
-    else:
-        print("Error:", stderr)
+        # Check if the SSH command was successful
+        if ssh_process['success']:
+            # Check if there are any uncommitted changes
+            if "nothing to commit, working tree clean" not in ssh_process['output']:
+                print(f"Uncommitted changes detected on {hostname}")
+                instrument_uncommitted_changes.append(hostname)
+        else:
+            print(f"Error: {ssh_process.stderr}")
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
