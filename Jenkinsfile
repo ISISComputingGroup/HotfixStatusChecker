@@ -23,13 +23,9 @@ pipeline {
 
          stage("Dependencies") {
         steps {
-          echo "Installing local genie python"
+          echo "Installing local python and pip"
           bat """
-                setlocal
-                set WORKWIN=%WORKSPACE:/=\\%
-                rd /s /q %WORKWIN%\\Python3
-                call build\\update_genie_python.bat ${env.WORKSPACE}\\Python3
-                if %errorlevel% neq 0 exit /b %errorlevel%
+             call grab_python.bat
           """
         }
     }    
