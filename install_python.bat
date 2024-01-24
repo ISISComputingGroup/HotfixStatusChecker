@@ -5,8 +5,8 @@ set PYTHON_VERSION=3.9.7
 curl -o python_installer.exe https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
 
 :: Install Python silently
-python_installer.exe /quiet InstallAllUsers=1 PrependPath=1
-
+python_installer.exe /quiet PrependPath=1
+echo %PATH%
 :: Verify installation
-python3 --version
-pip3 --version
+python --version
+pip --version
