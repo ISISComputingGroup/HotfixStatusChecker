@@ -1,34 +1,14 @@
 @echo off
-setlocal EnableDelayedExpansion
-REM %1 is an alternative directory to install to
-REM
-REM It only takes two or three minutes to do a full install, so for simplicity we do that.
-REM it is installed using xcopy /d, so if it hasn't changed then it doesn't do anything.
+setlocal
 
+REM Set the source and destination paths
+set "sourceDir=\\isis\inst$\Kits$\CompGroup\ICP\genie_python_3\BUILD-2613"
+set "destinationDir=C:\HotfixStatusChecker\Python3"
 
-set "PYTHON_KITS_PATH=\\isis\inst$\Kits$\CompGroup\ICP\genie_python_3"
-set "PYTHON_INSTALL_DIR=C:\HotfixStatusChecker\Python3"
+REM Copy python3 directory
+xcopy /E /D "%sourceDir%\Python\python3" "%destinationDir%\Python3\python3"
 
-if not "%1" == "" (
-    set "PYTHON_INSTALL_DIR=%1"
-)
- 
-@echo %TIME% Updating genie_python
+REM Copy pip3.exe
+copy /Y "%sourceDir%\Scripts\pip3.exe" "%destinationDir%\pip3.exe"
 
-if exist "%PYTHON_KITS_PATH%\LATEST_BUILD.txt" (
-	for /f %%i in ( %PYTHON_KITS_PATH%\LATEST_BUILD.txt ) do (
-		@echo NEW_BUILD: %%i
-		call %PYTHON_KITS_PATH%\BUILD-%%i\genie_python_install.bat %PYTHON_INSTALL_DIR%
-        if !errorlevel! neq 0 goto ERROR
-	)
-) else (
-	@echo Could not access LATEST_BUILD.txt
-	goto ERROR
-)
-
-@echo %TIME% update_genie_python OK
-exit /b 0
-
-:ERROR
-@echo %TIME% update_genie_python failed
-exit /b 1
+echo Copy completed successfully.
