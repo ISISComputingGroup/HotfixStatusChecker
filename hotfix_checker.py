@@ -3,11 +3,11 @@ import subprocess
 import sys
 import git
 from util.channel_access import ChannelAccessUtils
-import socket
-from ssh.session import Session
-from ssh import options
+# import socket
+# from ssh.session import Session
+# from ssh import options
 # make sure paramiko is installed on the machine running this script
-# import paramiko
+import paramiko
 
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
@@ -67,49 +67,37 @@ PORT = 22
 
 def runssh(host, username, password, commands):
     try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((host, PORT))
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(host, port=PORT, username=username, password=password)
 
-        s = Session()
-        s.options_set(options.HOST, host)
-        s.options_set(options.USER, username)
-        s.options_set_port(PORT)
-        s.set_socket(sock)
-        s.connect()
-
-        # Authenticate with agent
-        s.userauth_password(username, password)
+        outputs = []
 
         for command in commands:
             print(f'Running "{command}" on {host}')
-            chan = s.channel_new()
-            chan.open_session()
-            chan.request_exec(command)
-            size, data = chan.read()
-            while size > 0:
-                print(data.strip())
-                size, data = chan.read()
-            chan.close()
+            stdin, stdout, stderr = client.exec_command(command)
+            output = stdout.read().decode('utf-8')
+            print(output)
+            outputs.append(output)
 
-        s.disconnect()
-        return {'success': True, 'output': data}
+        client.close()
+        return {'success': True, 'output': outputs}
     except Exception as e:
         print(str(e))
         return {'success': False, 'output': str(e)}
 
 def check_for_uncommitted_changes(hostname):
-    
-        commands = ['cd C:\\Instrument\\Apps\\EPICS\\', 'git status']
-        ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, commands)
+    commands = ['cd C:\\Instrument\\Apps\\EPICS\\', 'git status']
+    ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, commands)
 
-        # Check if the SSH command was successful
-        if ssh_process['success']:
-            # Check if there are any uncommitted changes
-            if "nothing to commit, working tree clean" not in ssh_process['output']:
-                print(f"Uncommitted changes detected on {hostname}")
-                instrument_uncommitted_changes.append(hostname)
-        else:
-            print(f"Error: {ssh_process.stderr}")
+    # Check if the SSH command was successful
+    if ssh_process['success']:
+        # Check if there are any uncommitted changes
+        if "nothing to commit, working tree clean" not in '\n'.join(ssh_process['output']):
+            print(f"Uncommitted changes detected on {hostname}")
+            instrument_uncommitted_changes.append(hostname)
+    else:
+        print(f"Error: {ssh_process['output']}")
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
