@@ -21,14 +21,17 @@ pipeline {
   
     stages {  
 
-         stage("Dependencies") {
+        stage("Dependencies") {
         steps {
-          echo "Installing local python and pip"
-          bat """
-             call build\\grab_python.bat
-          """
+          echo "Installing local genie python"
+          timeout(time: 1, unit: 'HOURS') {
+            bat """
+                call get_python.bat ${env.WORKSPACE}\\Python3
+                if %errorlevel% neq 0 exit /b %errorlevel%
+            """
+          }
         }
-    }    
+        }
 
         stage("Checkout") {
             steps {
