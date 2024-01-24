@@ -21,14 +21,12 @@ pipeline {
   
     stages {  
 
-        stage("Install Python") {
+        stage('Install Python') {
             steps {
-                bat """
-                    choco install python3 -y
-                    """
+                bat 'install_python.bat'
             }
         }
-
+        
         stage("Install ssh-python") {
             steps {
                 bat """
