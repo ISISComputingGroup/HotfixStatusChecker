@@ -21,6 +21,22 @@ pipeline {
   
     stages {  
 
+        stage("Install Python") {
+            steps {
+                bat """
+                    choco install python3 -y
+                    """
+            }
+        }
+
+        stage("Install ssh-python") {
+            steps {
+                bat """
+                    pip install ssh-python
+                    """
+            }
+        }
+
         stage("Checkout") {
             steps {
                 timeout(time: 2, unit: 'HOURS') {
