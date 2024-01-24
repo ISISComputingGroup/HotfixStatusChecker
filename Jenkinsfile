@@ -25,7 +25,7 @@ pipeline {
         steps {
           echo "Installing local python and pip"
           bat """
-             call grab_python.bat
+             call build\\grab_python.bat
           """
         }
     }    
