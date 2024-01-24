@@ -88,16 +88,22 @@ def runssh(host, username, password, commands):
 
 def check_for_uncommitted_changes(hostname):
     commands = ['cd C:\\Instrument\\Apps\\EPICS\\', 'git status']
-    ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, commands)
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.connect(hostname, port=PORT, username=SSH_USERNAME, password=SSH_PASSWORD)
+    client.exec_command('cd C:\\Instrument\\Apps\\EPICS\\')
+    stdin, stdout, stderr = client.exec_command('git status')
+    print(stdout.read().decode('utf-8'))
+    client.close()
 
     # Check if the SSH command was successful
-    if ssh_process['success']:
+    # if ssh_process['success']:
         # Check if there are any uncommitted changes
-        if "nothing to commit, working tree clean" not in '\n'.join(ssh_process['output']):
-            print(f"Uncommitted changes detected on {hostname}")
-            instrument_uncommitted_changes.append(hostname)
-    else:
-        print(f"Error: {ssh_process['output']}")
+    if "nothing to commit, working tree clean" not in stdout.read().decode('utf-8'):
+        print(f"Uncommitted changes detected on {hostname}")
+        instrument_uncommitted_changes.append(hostname)
+    # else:
+    #     print(f"Error: {ssh_process['output']}")
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
