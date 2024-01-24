@@ -11,6 +11,7 @@ import paramiko
 
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
+SSH_PORT = 22
 
 # get the inst username and pw from Jenkins paramters
 SSH_USERNAME = os.environ['SSH_USERNAME']
@@ -32,83 +33,34 @@ instrument_uncommitted_changes = []
 unreachable_instruments = []
 
 
-# def check_for_uncommitted_changes(hostname):
-#     ssh = paramiko.SSHClient()
-
-#     # Automatically add the server's host key
-#     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-#     try:
-#         # Connect to the remote machine via file
-#         ssh.connect(hostname, username=SSH_USERNAME, password=SSH_PASSWORD)
-
-#         # Change to the EPICS directory
-#         ssh.exec_command("cd C:\\Instrument\\Apps\\EPICS\\")
-
-#         # Run the 'git status' command
-#         stdin, stdout, stderr = ssh.exec_command('git status')
-
-#         # Get the output of the command
-#         output = stdout.read().decode('utf-8')
-
-#         # Check if there are any uncommitted changes
-#         if "nothing to commit, working tree clean" not in output:
-#             print(f"Uncommitted changes detected on {hostname}")
-#             instrument_uncommitted_changes.append(hostname)
-
-#     except Exception as e:
-#         print(f"Error: {e}")
-
-#     finally:
-#         # Close the SSH connection
-#         ssh.close()
-
-PORT = 22
-
-def runssh(host, username, password, commands):
+def runssh(host, username, password, command):
     try:
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(host, port=PORT, username=username, password=password)
-
-        outputs = []
-
-        for command in commands:
-            print(f'Running "{command}" on {host}')
-            stdin, stdout, stderr = client.exec_command(command)
-            output = stdout.read().decode('utf-8')
-            print(output)
-            outputs.append(output)
-
+        client.connect(host, port=SSH_PORT, username=username, password=password)
+        stdin, stdout, stderr = client.exec_command(command)
+        output = stdout.read().decode('utf-8')
+        error = stderr.read().decode('utf-8')
         client.close()
-        return {'success': True, 'output': outputs}
+        if error:
+            return {'success': False, 'output': error}
+        else:
+            return {'success': True, 'output': output}
     except Exception as e:
         print(str(e))
         return {'success': False, 'output': str(e)}
 
 def check_for_uncommitted_changes(hostname):
-    # commands = ['cd C:\\Instrument\\Apps\\EPICS\\', 'git status']
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect(hostname, port=PORT, username=SSH_USERNAME, password=SSH_PASSWORD)
-    # client.exec_command('cd C:\\Instrument\\Apps\\EPICS\\ && git status')
-    stdin, stdout, stderr = client.exec_command('cd C:\\Instrument\\Apps\\EPICS\\ && git status')
-    output = stdout.read().decode('utf-8')
-    error = stderr.read().decode('utf-8')
-    print(output)
-    client.close()
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status"
+    ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
-    if error:
-        print(f"Error: {error}")
+    if ssh_process['success']:
+        if "nothing to commit, working tree clean" not in ssh_process['output']:
+            print(f"Uncommitted changes detected on {hostname}")
+            instrument_uncommitted_changes.append(hostname)
+    else:
+        print(f"Error: {ssh_process['output']}")
 
-    # Check if the SSH command was successful
-    # if ssh_process['success']:
-        # Check if there are any uncommitted changes
-    if "nothing to commit, working tree clean" not in output:
-        print(f"Uncommitted changes detected on {hostname}")
-        instrument_uncommitted_changes.append(hostname)
-    # else:
-    #     print(f"Error: {ssh_process['output']}")
 
 def check_instrument(hostname):
     print(f'Checking {hostname}')
@@ -126,7 +78,7 @@ def check_instrument(hostname):
     repo.git.pull()
 
     commits = repo.git.rev_list('--count', hostname)
-    print(commits)
+    # print(commits)
     # initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
     if int(commits) > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
@@ -135,9 +87,10 @@ def check_instrument(hostname):
         print(f"The branch '{hostname}' has no hotfix commits.")
         instrument_no_hotfix.append(hostname)
 
-
     # check if any uncommitted changes run on each instrument
     check_for_uncommitted_changes(hostname)
+    if hostname in instrument_uncommitted_changes:
+        print(f"The branch '{hostname}' has uncommitted changes.")
 
 
 
