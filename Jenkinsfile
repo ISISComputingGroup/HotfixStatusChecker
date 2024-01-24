@@ -21,17 +21,17 @@ pipeline {
   
     stages {  
 
-        stage("Dependencies") {
-        steps {
-          echo "Installing local genie python"
-          timeout(time: 1, unit: 'HOURS') {
-            bat """
-                call get_python.bat ${env.WORKSPACE}\\Python3
-                if %errorlevel% neq 0 exit /b %errorlevel%
-            """
-          }
-        }
-        }
+        // stage("Dependencies") {
+        // steps {
+        //   echo "Installing local genie python"
+        //   timeout(time: 1, unit: 'HOURS') {
+        //     bat """
+        //         call get_python.bat ${env.WORKSPACE}\\Python3
+        //         if %errorlevel% neq 0 exit /b %errorlevel%
+        //     """
+        //   }
+        // }
+        // }
 
         stage("Checkout") {
             steps {
