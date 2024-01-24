@@ -1,4 +1,4 @@
-@echo off
+@REM @echo off
 set PYTHON_VERSION=3.9.7
 
 :: Download Python installer
