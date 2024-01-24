@@ -3,7 +3,7 @@ setlocal
 @REM CALL \\isis\Shares\ISIS_Experiment_Controls_Public\ibex_utils\installation_and_upgrade\define_latest_genie_python.bat
 setlocal EnableDelayedExpansion
 REM Remove old builds from the archive
-CALL \\isis\Shares\ISIS_Experiment_Controls_Public\ibex_utils\installation_and_upgrade\define_latest_genie_python.bat 3
+CALL \\isis\Shares\ISIS_Experiment_Controls_Public\ibex_utils\installation_and_upgrade\define_latest_genie_python.bat
 
 if not "%WORKSPACE%" == "" (
     if exist "%WORKSPACE%\Python3" rd /s /q %WORKSPACE%\Python3
