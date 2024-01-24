@@ -21,19 +21,18 @@ pipeline {
   
     stages {  
 
-        stage('Install Python') {
-            steps {
-                bat 'install_python.bat'
-            }
+         stage("Dependencies") {
+        steps {
+          echo "Installing local genie python"
+          bat """
+                setlocal
+                set WORKWIN=%WORKSPACE:/=\\%
+                rd /s /q %WORKWIN%\\Python3
+                call build\\update_genie_python.bat ${env.WORKSPACE}\\Python3
+                if %errorlevel% neq 0 exit /b %errorlevel%
+          """
         }
-        
-        stage("Install ssh-python") {
-            steps {
-                bat """
-                    pip install ssh-python
-                    """
-            }
-        }
+    }    
 
         stage("Checkout") {
             steps {
