@@ -1,6 +1,6 @@
 @REM @echo off
 set PYTHON_VERSION=3.9.7
-set INSTALLATION_PATH=C:\HotfixStatusChecker\Python
+set INSTALLATION_PATH=C:\HotfixStatusChecker
 
 :: Download Python installer
 curl -o python_installer.exe https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-amd64.exe
