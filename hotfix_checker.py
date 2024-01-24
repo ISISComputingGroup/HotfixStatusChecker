@@ -94,8 +94,12 @@ def check_for_uncommitted_changes(hostname):
     client.exec_command('cd C:\\Instrument\\Apps\\EPICS\\')
     stdin, stdout, stderr = client.exec_command('git status')
     output = stdout.read().decode('utf-8')
+    error = stderr.read().decode('utf-8')
     print(output)
     client.close()
+
+    if error:
+        print(f"Error: {error}")
 
     # Check if the SSH command was successful
     # if ssh_process['success']:
