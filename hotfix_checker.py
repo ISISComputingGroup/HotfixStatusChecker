@@ -55,7 +55,7 @@ def check_instrument(hostname):
         repo.git.checkout(hostname)
     except git.GitCommandError:
         print(f"Could not checkout branch '{hostname}'")
-        instrument_result.unreachable = True
+        instrument_result["unreachable"] = True
         return
     
     repo.git.pull()
@@ -65,19 +65,19 @@ def check_instrument(hostname):
     # initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
     if int(commits) > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
-        instrument_result.hotfix_detected = True
+        instrument_result["hotfix_detected"] = True
     else:
         print(f"The branch '{hostname}' has no hotfix commits.")
-        instrument_result.no_hotfix = True
+        instrument_result["no_hotfix"] = True
 
     # check if any uncommitted changes run on each instrument
     uncommitted_changes = check_for_uncommitted_changes(hostname)
     if  uncommitted_changes == True:
-        instrument_result.uncommitted_changes = True
+        instrument_result["uncommitted_changes"] = True
     elif uncommitted_changes == False:
-        instrument_result.uncommitted_changes = False
+        instrument_result["uncommitted_changes"] = False
     else: 
-        instrument_result.unreachable = True
+        instrument_result["unreachable"] = True
 
     return instrument_result
 
@@ -97,13 +97,13 @@ if __name__ == "__main__":
 
     for instrument in instruments:
         instrument_result = check_instrument(instrument)
-        if instrument_result.unreachable == True:
+        if instrument_result["unreachable"]== True:
             result.unreachable_instruments.append(instrument)
-        elif instrument_result.uncommitted_changes == True:
+        elif instrument_result["uncommitted_changes"] == True:
             result.instrument_uncommitted_changes.append(instrument)
-        elif instrument_result.hotfix_detected == True:
+        elif instrument_result["hotfix_detected"] == True:
             result.instrument_hotfix_detected.append(instrument)
-        elif instrument_result.no_hotfix == True:
+        elif instrument_result["no_hotfix"] == True:
             result.instrument_no_hotfix.append(instrument)
 
     print("INFO: NO HOTFIXES detected on: " + str(result.instrument_no_hotfix))
