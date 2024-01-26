@@ -79,6 +79,8 @@ def check_for_pushed_changes(hostname):
         CHECK: The result of the check.
     """
     repo = git.Repo(EPICS_DIR)
+    repo.git.fetch()
+    repo.git.pull()
     try:
         repo.git.checkout(hostname)
     except git.GitCommandError:
