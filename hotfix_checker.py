@@ -26,6 +26,9 @@ def _get_env_var(var_name):
 SSH_USERNAME = _get_env_var("SSH_CREDENTIALS_USR")
 SSH_PASSWORD = _get_env_var("SSH_CREDENTIALS_PSW")
 
+print(f"SSH_USERNAME: {SSH_USERNAME}")
+print(f"SSH_PASSWORD: {SSH_PASSWORD}")
+
 
 def runssh(host, username, password, command):
     """ Run a command on a remote host using SSH."""
