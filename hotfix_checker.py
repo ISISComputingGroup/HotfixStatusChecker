@@ -91,10 +91,8 @@ def check_for_pushed_changes(hostname):
 
     commits = repo.git.rev_list('--count', hostname)
     if int(commits) > 1:
-        print(f"The branch '{hostname}' has hotfix commits.")
         return CHECK.TRUE
     else:
-        print(f"The branch '{hostname}' has no hotfix commits.")
         return CHECK.FALSE
 
 
@@ -118,6 +116,8 @@ def check_instrument(hostname):
     # return the result of the checks
     instrument_status = {"hotfix_detected": pushed_changes_enum,
                          "uncommitted_changes": uncommitted_changes_enum}
+
+    print("Checked " + hostname)
 
     return instrument_status
 
