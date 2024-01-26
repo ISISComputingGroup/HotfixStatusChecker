@@ -103,8 +103,6 @@ def check_instrument(hostname):
     Returns:
         dict: A dictionary with the result of the checks.
     """
-    print(f'Checking {hostname}')
-
     # Check if any hotfixes run on each instrument
     pushed_changes_enum = check_for_pushed_changes(hostname)
 
@@ -114,8 +112,6 @@ def check_instrument(hostname):
     # return the result of the checks
     instrument_status = {"hotfix_detected": pushed_changes_enum,
                          "uncommitted_changes": uncommitted_changes_enum}
-
-    print("Checked " + hostname)
 
     return instrument_status
 
