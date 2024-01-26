@@ -100,11 +100,14 @@ if __name__ == "__main__":
         print(instrument_result)
         if instrument_result["unreachable"] == True:
             result["unreachable_instruments"].append(instrument)
-        elif instrument_result["uncommitted_changes"] == True:
+
+        if instrument_result["uncommitted_changes"] == True:
             result["instrument_uncommitted_changes"].append(instrument)
-        elif instrument_result["hotfix_detected"] == True:
+
+        if instrument_result["hotfix_detected"] == True:
             result["instrument_hotfix_detected"].append(instrument)
-        elif instrument_result["no_hotfix"] == True:
+            
+        if instrument_result["no_hotfix"] == True:
             result["instrument_no_hotfix"].append(instrument)
 
     print("INFO: NO HOTFIXES detected on: " + str(result["instrument_no_hotfix"]))
