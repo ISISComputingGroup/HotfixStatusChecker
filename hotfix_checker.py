@@ -96,7 +96,7 @@ if __name__ == "__main__":
     print('Starting instrument hotfix checker')
 
     for instrument in instruments:
-        instrument_result = check_instrument(instrument, result)
+        instrument_result = check_instrument(instrument)
         if instrument_result.unreachable == True:
             result.unreachable_instruments.append(instrument)
         elif instrument_result.uncommitted_changes == True:
