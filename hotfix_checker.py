@@ -54,6 +54,7 @@ def check_for_uncommitted_changes(hostname):
     """ Check if there are any uncommitted changes on the instrument via SSH."""
     command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status --porcelain"
     ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    print(ssh_process)
 
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
