@@ -7,3 +7,4 @@ need to make sure git status command is done on the correct branch and throw err
 need to think about other problems and edge cases
 Need to make sure that a class couldn't be used ro easier simple functions and vice versa
 Need to make sure of any other jenkins things i could apply and that is all setup correctly
+make version number be updated or as an env and param for the check script and add to release
