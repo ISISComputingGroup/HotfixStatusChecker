@@ -1,39 +1,24 @@
 #!groovy
 
 pipeline {
-
     // using same agnert as ConfigCheck job
-    agent {  
+    agent {
         label {
-            label "ConfigCheck"
+            label 'ConfigCheck'
         }
     }
-  
+
     triggers {
         cron('H * * * *')
     }
-  
+
     environment {
-        EPICS_DIR = "C:/HotfixStatusChecker/EPICS"
-        SSH_USERNAME = "${SSH_USERNAME}"
-        SSH_PASSWORD = "${SSH_PASSWORD}"
+        EPICS_DIR = 'C:/HotfixStatusChecker/EPICS'
+        SSH_CREDENTIALS = credentials('SSH')
     }
-  
-    stages {  
 
-        // stage("Dependencies") {
-        // steps {
-        //   echo "Installing local genie python"
-        //   timeout(time: 1, unit: 'HOURS') {
-        //     bat """
-        //         call get_python.bat ${env.WORKSPACE}\\Python3
-        //         if %errorlevel% neq 0 exit /b %errorlevel%
-        //     """
-        //   }
-        // }
-        // }
-
-        stage("Checkout") {
+    stages {
+        stage('Checkout') {
             steps {
                 timeout(time: 2, unit: 'HOURS') {
                     retry(5) {
@@ -41,15 +26,15 @@ pipeline {
                     }
                 }
             }
-        }   
+        }
 
-        stage("Check Instrument has any Hotfixes and then any uncommitteed changes") {
+        stage('Check Instrument has any Hotfixes and then any uncommitteed changes') {
             steps {
-                echo "Check Instrument has any Hotfixes and then any uncommitteed changes"
+                echo 'Check Instrument has any Hotfixes and then any uncommitteed changes'
                 timeout(time: 1, unit: 'HOURS') {
-                    bat """
+                    bat '''
                         call hotfix_checker.bat
-                    """
+                    '''
                 }
             }
         }
@@ -57,14 +42,13 @@ pipeline {
 
     post {
         always {
-            logParser ([
+            logParser([
                 projectRulePath: 'parse_rules',
                 parsingRulesPath: '',
-                showGraphs: true, 
+                showGraphs: true,
                 unstableOnWarning: true,
                 useProjectRule: true,
             ])
         }
     }
-
 }
