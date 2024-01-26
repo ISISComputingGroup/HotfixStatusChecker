@@ -98,13 +98,13 @@ if __name__ == "__main__":
     for instrument in instruments:
         instrument_result = check_instrument(instrument)
         if instrument_result["unreachable"]== True:
-            result.unreachable_instruments.append(instrument)
+            result["unreachable_instruments"].append(instrument)
         elif instrument_result["uncommitted_changes"] == True:
-            result.instrument_uncommitted_changes.append(instrument)
+            result["instrument_uncommitted_changes"].append(instrument)
         elif instrument_result["hotfix_detected"] == True:
-            result.instrument_hotfix_detected.append(instrument)
+            result["instrument_hotfix_detected"].append(instrument)
         elif instrument_result["no_hotfix"] == True:
-            result.instrument_no_hotfix.append(instrument)
+            result["instrument_no_hotfix"].append(instrument)
 
     print("INFO: NO HOTFIXES detected on: " + str(result.instrument_no_hotfix))
     print("INFO: 1+ HOTFIXES detected on: " + str(result.instrument_hotfix_detected))
