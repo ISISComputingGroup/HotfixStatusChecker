@@ -3,7 +3,6 @@ This is a Jenkins pipeline to check the status of a hotfix branch in the EPICS r
 It checks their branches for commits and also SSH into the instrument machines to check for uncommitted changes.
 It fails when there are uncommitted changes or an instrument is unreachable either via branch or hotfix.
 
-Need to do credential store
 need to make sure git status command is done on the correct branch and throw error if not
 need to think about other problems and edge cases
 Need to consider maybe just do the git commands that aren't on ssh on ssh anyways to streamline and keep code consistent

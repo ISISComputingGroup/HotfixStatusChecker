@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 import subprocess
 import sys
@@ -26,8 +27,13 @@ def _get_env_var(var_name):
 SSH_USERNAME = _get_env_var("SSH_CREDENTIALS_USR")
 SSH_PASSWORD = _get_env_var("SSH_CREDENTIALS_PSW")
 
-print(f"SSH_USERNAME: {SSH_USERNAME}")
-print(f"SSH_PASSWORD: {SSH_PASSWORD}")
+# write enum with undeterminable, true, false
+
+
+class CHECK(Enum):
+    UNDETERMINABLE = 0
+    TRUE = 1
+    FALSE = 2
 
 
 def runssh(host, username, password, command):
@@ -59,49 +65,47 @@ def check_for_uncommitted_changes(hostname):
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
             print(f"Uncommitted changes detected on {hostname}")
-            return True
+            return CHECK.TRUE
+        else:
+            print(f"No uncommitted changes detected on {hostname}")
+            return CHECK.FALSE
     else:
         print(f"Error: {ssh_process['output']}")
-        return ssh_process['output']
+        return CHECK.UNDETERMINABLE
 
 
-def check_instrument(hostname):
-    """ Check if there are any hotfixes or uncomitted changes on AN instrument."""
-    print(f'Checking {hostname}')
-    # Connect to instrument/ get instrument branch details via it auto-pushing to get uncommitted changes
-    # Set repo from file path
-
-    instrument_result = {"hotfix_detected": False, "no_hotfix": False,
-                         "uncommitted_changes": False, "unreachable": False}
-
+def check_for_pushed_changes(hostname):
     repo = git.Repo(EPICS_DIR)
     try:
         repo.git.checkout(hostname)
     except git.GitCommandError:
         print(f"Could not checkout branch '{hostname}'")
-        instrument_result["unreachable"] = True
-        return
+        return CHECK.UNDETERMINABLE
 
     repo.git.pull()
 
     commits = repo.git.rev_list('--count', hostname)
-    # print(commits)
-    # Initial creation fo branch seems to count as a commit when using git rev-list --count branch-name
     if int(commits) > 1:
         print(f"The branch '{hostname}' has hotfix commits.")
-        instrument_result["hotfix_detected"] = True
+        return CHECK.TRUE
     else:
         print(f"The branch '{hostname}' has no hotfix commits.")
-        instrument_result["no_hotfix"] = True
+        return CHECK.FALSE
+
+
+def check_instrument(hostname):
+    """ Check if there are any hotfixes or uncomitted changes on AN instrument."""
+    print(f'Checking {hostname}')
+
+    # Check if any hotfixes run on each instrument
+    pushed_changes_enum = check_for_pushed_changes(hostname)
 
     # Check if any uncommitted changes run on each instrument
-    uncommitted_changes = check_for_uncommitted_changes(hostname)
-    if uncommitted_changes == True:
-        instrument_result["uncommitted_changes"] = True
-    elif uncommitted_changes == False:
-        instrument_result["uncommitted_changes"] = False
-    else:
-        instrument_result["unreachable"] = True
+    uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
+
+    # return the result of the checks
+    instrument_result = {"hotfix_detected": pushed_changes_enum,
+                         "uncommitted_changes": uncommitted_changes_enum}
 
     return instrument_result
 
@@ -126,17 +130,11 @@ def check_instruments():
 
     for instrument in instruments:
         instrument_result = check_instrument(instrument)
-        if instrument_result["unreachable"] == True:
-            result["unreachable_instruments"].append(instrument)
-
-        if instrument_result["uncommitted_changes"] == True:
-            result["instrument_uncommitted_changes"].append(instrument)
-
-        if instrument_result["hotfix_detected"] == True:
-            result["instrument_hotfix_detected"].append(instrument)
-
-        if instrument_result["no_hotfix"] == True:
-            result["instrument_no_hotfix"].append(instrument)
+        for key in instrument_result:
+            if instrument_result[key] == CHECK.TRUE:
+                result["instrument_" + key].append(instrument)
+            elif instrument_result[key] == CHECK.UNDETERMINABLE:
+                result["unreachable_instruments"].append(instrument)
 
     print("INFO: NO HOTFIXES detected on: " +
           str(result["instrument_no_hotfix"]))
