@@ -97,7 +97,8 @@ if __name__ == "__main__":
 
     for instrument in instruments:
         instrument_result = check_instrument(instrument)
-        if instrument_result["unreachable"]== True:
+        print(instrument_result)
+        if instrument_result["unreachable"] == True:
             result["unreachable_instruments"].append(instrument)
         elif instrument_result["uncommitted_changes"] == True:
             result["instrument_uncommitted_changes"].append(instrument)
