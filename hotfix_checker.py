@@ -32,11 +32,11 @@ def runssh(host, username, password, command):
         return {'success': False, 'output': str(e)}
 
 def check_for_uncommitted_changes(hostname):
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status --porcelain"
     ssh_process = runssh(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
-        if "nothing to commit, working tree clean" not in ssh_process['output']:
+        if ssh_process['output'].strip() != "":
             print(f"Uncommitted changes detected on {hostname}")
             return True
     else:
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
         if instrument_result["hotfix_detected"] == True:
             result["instrument_hotfix_detected"].append(instrument)
-            
+
         if instrument_result["no_hotfix"] == True:
             result["instrument_no_hotfix"].append(instrument)
 
