@@ -8,8 +8,8 @@ import paramiko
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
 SSH_PORT = 22
-SSH_USERNAME = os.environ("SSH_CREDENTIALS_USR")
-SSH_PASSWORD = os.environ("SSH_CREDENTIALS_PSW")
+SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
+SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
 
 
 class CHECK(Enum):
