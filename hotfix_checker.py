@@ -106,15 +106,15 @@ if __name__ == "__main__":
         elif instrument_result["no_hotfix"] == True:
             result["instrument_no_hotfix"].append(instrument)
 
-    print("INFO: NO HOTFIXES detected on: " + str(result.instrument_no_hotfix))
-    print("INFO: 1+ HOTFIXES detected on: " + str(result.instrument_hotfix_detected))
+    print("INFO: NO HOTFIXES detected on: " + str(result["instrument_no_hotfix"]))
+    print("INFO: 1+ HOTFIXES detected on: " + str(result["instrument_hotfix_detected"]))
 
     # check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
-    if len(result.instrument_uncommitted_changes) > 0 : 
-        print("ERROR: Uncommitted changes detected on: " + str(result.instrument_uncommitted_changes))
+    if len(result["instrument_uncommitted_changes"]) > 0 : 
+        print("ERROR: Uncommitted changes detected on: " + str(result["instrument_uncommitted_changes"]))
         sys.exit(1)
-    elif len(result.unreachable_instruments) > 0:
-        print("ERROR: Could not connect to: " + str(result.unreachable_instruments))
+    elif len(result["unreachable_instruments"]) > 0:
+        print("ERROR: Could not connect to: " + str(result["unreachable_instruments"]))
         sys.exit(1)
     else:
         sys.exit(0)
