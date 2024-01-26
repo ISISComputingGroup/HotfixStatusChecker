@@ -5,6 +5,5 @@ It fails when there are uncommitted changes or an instrument is unreachable eith
 
 need to make sure git status command is done on the correct branch and throw error if not
 need to think about other problems and edge cases
-Need to consider maybe just do the git commands that aren't on ssh on ssh anyways to streamline and keep code consistent
 Need to make sure that a class couldn't be used ro easier simple functions and vice versa
 Need to make sure of any other jenkins things i could apply and that is all setup correctly
