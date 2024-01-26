@@ -133,7 +133,7 @@ def get_instrument_list():
         instrument_list = ["NDX" + instrument['name']
                            for instrument in instrument_list]
 
-    instrument_list = ['NDXSCIDEMO', 'NDXCRYOLAB_R80']
+    instrument_list = ['NDXSCIDEMO']
     return instrument_list
 
 
