@@ -62,10 +62,8 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
-            print(f"Uncommitted changes detected on {hostname}")
             return CHECK.TRUE
         else:
-            print(f"No uncommitted changes detected on {hostname}")
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
