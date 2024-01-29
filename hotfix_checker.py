@@ -96,6 +96,27 @@ def check_for_pushed_changes(hostname):
         return CHECK.FALSE
 
 
+def check_for_commits_with_SSH(hostname):
+    """ Check if there are any hotfixes on the instrument via SSH.
+
+    Args:
+        hostname (str): The hostname to connect to.
+
+    Returns:
+        CHECK: The result of the check.
+    """
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git rev-list --count {hostname}"
+    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+
+    if ssh_process['success']:
+        if int(ssh_process['output'].strip()) > 1:
+            return CHECK.TRUE
+        else:
+            return CHECK.FALSE
+    else:
+        return CHECK.UNDETERMINABLE
+
+
 def check_instrument(hostname):
     """ Check if there are any hotfixes or uncomitted changes on AN instrument.
 
@@ -106,7 +127,7 @@ def check_instrument(hostname):
         dict: A dictionary with the result of the checks.
     """
     # Check if any hotfixes run on each instrument
-    pushed_changes_enum = check_for_pushed_changes(hostname)
+    pushed_changes_enum = check_for_commits_with_SSH(hostname)
 
     # Check if any uncommitted changes run on each instrument
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
