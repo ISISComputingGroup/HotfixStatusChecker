@@ -177,11 +177,13 @@ def check_for_commits_with_prefix(hostname, commit_prefix):
     Returns:
         CHECK: The result of the check.
     """
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --grep='^{commit_prefix}: ' --oneline | wc -l"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
-        commit_count = int(ssh_process['output'].strip())
+        output = ssh_process['output']
+        # check for any commit messages with the prefix
+        commit_count = output.count(commit_prefix)
         if commit_count > 0:
             print(f"Hotfix/es detected on {hostname}")
             return CHECK.TRUE
