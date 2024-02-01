@@ -214,8 +214,8 @@ def check_instrument(hostname):
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
 
     # return the result of the checks
-    instrument_status = {"hotfix_detected": pushed_changes_enum.name, "upstream_commits_pending_pulling": upstream_commits_enum.name, "upstream_commits_not_pushed": upstream_commits_enum.name,
-                         "uncommitted_changes": uncommitted_changes_enum.name}
+    instrument_status = {"hotfix_detected": pushed_changes_enum, "upstream_commits_pending_pulling": upstream_commits_enum, "upstream_commits_not_pushed": upstream_commits_enum,
+                         "uncommitted_changes": uncommitted_changes_enum}
 
     return instrument_status
 
