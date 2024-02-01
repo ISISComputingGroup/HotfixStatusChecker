@@ -255,6 +255,7 @@ def check_instruments():
     for instrument in instrument_list:
         try:
             instrument_status = check_instrument(instrument)
+            print(f"INFO: {instrument} status: {instrument_status}")
             if instrument_status["hotfix_detected"] == CHECK.TRUE:
                 instrument_status_lists["instrument_hotfix_detected"].append(
                     instrument)
