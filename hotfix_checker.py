@@ -251,7 +251,7 @@ def check_instruments():
 
     instrument_list = get_instrument_list()
 
-    instrument_status_lists = {"instrument_hotfix_detected": [], "instrument_no_hotfix": [], "instrument_upstream_commits_pending_pulling": [], "instrument_upstream_commits_not_pushed": [],
+    instrument_status_lists = {"instrument_hotfix_detected": [], "instrument_upstream_commits_pending_pulling": [], "instrument_upstream_commits_not_pushed": [],
                                "instrument_uncommitted_changes": [], "unreachable_instruments": []}
 
     for instrument in instrument_list:
@@ -261,9 +261,9 @@ def check_instruments():
             if instrument_status["hotfix_detected"] == CHECK.TRUE:
                 instrument_status_lists["instrument_hotfix_detected"].append(
                     instrument)
-            elif instrument_status["hotfix_detected"] == CHECK.FALSE:
-                instrument_status_lists["instrument_no_hotfix"].append(
-                    instrument)
+            # elif instrument_status["hotfix_detected"] == CHECK.FALSE:
+            #     instrument_status_lists["instrument_no_hotfix"].append(
+            #         instrument)
             elif instrument_status["hotfix_detected"] == CHECK.UNDETERMINABLE:
                 instrument_status_lists["unreachable_instruments"].append(
                     instrument)
