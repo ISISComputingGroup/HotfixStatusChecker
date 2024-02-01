@@ -139,6 +139,7 @@ def check_for_commits_not_pushed_upstream(hostname):
     # Run the command to check if galil-old is in the commit history
     command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --grep='galil-old' --oneline | wc -l"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    host_branch = ""
     if ssh_process['success']:
         commit_count = int(ssh_process['output'].strip())
         if commit_count > 0:
