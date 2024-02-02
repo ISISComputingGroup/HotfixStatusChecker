@@ -9,7 +9,7 @@ pipeline {
     }
 
     triggers {
-        cron('0 8 * * *')
+        cron('H 8 * * *')
     }
 
     environment {
