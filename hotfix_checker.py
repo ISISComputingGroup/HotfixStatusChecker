@@ -64,10 +64,9 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
-            print(f"Uncommitted changes detected on {hostname}")
             return CHECK.TRUE
         else:
-            print(f"No uncommitted changes detected on {hostname}")
+
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
@@ -109,9 +108,17 @@ def check_for_upstream_commits_pending(hostname):
     Returns:
         CHECK: The result of the check.
     """
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
+    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    host_branch = ""
+    if ssh_process['success']:
+        if "galil-old" in ssh_process['output']:
+            host_branch = "origin/galil-old"
+        else:
+            host_branch = "origin/main"
     # Run the command to check for upstream commits
     fetch_command = "cd C:\\Instrument\\Apps\\EPICS\\ && git fetch origin"
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {hostname}..origin/{hostname}"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {hostname}..{host_branch}"
 
     ssh_process_fetch = runSSHCommand(
         hostname, SSH_USERNAME, SSH_PASSWORD, fetch_command)
@@ -121,10 +128,8 @@ def check_for_upstream_commits_pending(hostname):
         output = ssh_process['output']
         # Check if there are any differences in commit history
         if "commit" in output:
-            print(f"Upstream commits pending for {hostname}")
             return CHECK.TRUE
         else:
-            print(f"No upstream commits pending for {hostname}")
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
@@ -159,12 +164,8 @@ def check_for_commits_not_pushed_upstream(hostname):
         output = ssh_process['output']
         # Check if there are any differences in commit history
         if "commit" in output:
-            print(
-                f"Commits not pushed upstream on {hostname} (to {host_branch})")
             return CHECK.TRUE
         else:
-            print(
-                f"No commits not pushed upstream on {hostname} (to {host_branch})")
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
@@ -188,10 +189,8 @@ def check_for_commits_with_prefix(hostname, commit_prefix):
         # check for any commit messages with the prefix
         commit_count = output.count(commit_prefix)
         if commit_count > 0:
-            print(f"Hotfix/es detected on {hostname}")
             return CHECK.TRUE
         else:
-            print(f"No hotfix/es detected on {hostname}")
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
@@ -206,16 +205,16 @@ def check_instrument(hostname):
     Returns:
         dict: A dictionary with the result of the checks.
     """
-    # Check if any hotfixes run on each instrument
+    # Check if any hotfixes run on the instrument
     pushed_changes_enum = check_for_commits_with_prefix(hostname, "Hotfix:")
 
-    # Check if any commits are not pushed upstream on each instrument
+    # Check if any commits are not pushed upstream on the instrument
     upstream_commits_enum = check_for_commits_not_pushed_upstream(hostname)
 
-    # Check if any upstream commits arnet on each instrument
+    # Check if any upstream commits are not on the instrument
     upstream_commits_enum = check_for_upstream_commits_pending(hostname)
 
-    # Check if any uncommitted changes run on each instrument
+    # Check if any uncommitted changes run on the instrument
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
 
     # return the result of the checks
