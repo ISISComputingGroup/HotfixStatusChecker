@@ -261,7 +261,6 @@ def check_instruments():
     Returns:
         None
         """
-    print('INFO: Starting instrument hotfix checker')
     if USE_TEST_INSTRUMENT_LIST == "true":
         instrument_list = TEST_INSTRUMENT_LIST.split(",")
         instrument_list = [instrument.strip()
@@ -278,12 +277,35 @@ def check_instruments():
         try:
             instrument_status = check_instrument(instrument)
             print(f"INFO: {instrument}")
-            print(
-                f"Commits not pushed: {instrument_status['commits_not_pushed']}")
-            print(
-                f"Uncommitted changes: {instrument_status['uncommitted_changes']}")
-            print(
-                f"Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
+            if instrument_status['commits_not_pushed'] == CHECK.TRUE:
+                print(
+                    f"WARNING: Commits not pushed: {instrument_status['commits_not_pushed']}")
+            elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
+                print(
+                    f"Commits not pushed: {instrument_status['commits_not_pushed']}")
+            else:
+                print(
+                    f"ERROR: Commits not pushed: Could not determine commits not pushed status")
+
+            if instrument_status['uncommitted_changes'] == CHECK.TRUE:
+                print(
+                    f"ERROR: Uncommitted changes: {instrument_status['uncommitted_changes']}")
+            elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
+                print(
+                    f"Uncommitted changes: {instrument_status['uncommitted_changes']}")
+            else:
+                print(
+                    f"ERROR: Uncommitted changes: Could not determine uncommitted changes status")
+
+            if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
+                print(
+                    f"ERROR: Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
+            elif instrument_status['upstream_commits_pending_pulling'] == CHECK.FALSE:
+                print(
+                    f"Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
+            else:
+                print(
+                    f"ERROR: Upstream commits pending pulling: Could not determine upstream commits pending pulling status")
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument)
