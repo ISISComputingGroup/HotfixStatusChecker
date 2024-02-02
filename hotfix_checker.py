@@ -99,7 +99,27 @@ def check_for_pushed_changes(hostname):
         return CHECK.FALSE
 
 
-def check_for_upstream_commits_pending(hostname):
+def get_parent_branch(hostname):
+    """ Get the parent branch of the instrument branch.
+
+    Args:
+        hostname (str): The hostname to connect to.
+
+    Returns:
+        str: The name of the parent branch.
+    """
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
+    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    if ssh_process['success']:
+        if "galil-old" in ssh_process['output']:
+            return "origin/galil-old"
+        else:
+            return "origin/main"
+    else:
+        return False
+
+
+def check_for_unpulled_parents_branch_changes(hostname):
     """ Check if there are any upstream commits waiting to be pulled into the local NDXMOTION branch.
 
     Args:
@@ -108,25 +128,23 @@ def check_for_upstream_commits_pending(hostname):
     Returns:
         CHECK: The result of the check.
     """
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
-    host_branch = ""
-    if ssh_process['success']:
-        if "galil-old" in ssh_process['output']:
-            host_branch = "origin/galil-old"
-        else:
-            host_branch = "origin/main"
+    # Get the parent branch of the instrument branch
+    parent_branch = get_parent_branch(hostname)
+    if not parent_branch:
+        return CHECK.UNDETERMINABLE
     # Run the command to check for upstream commits
     fetch_command = "cd C:\\Instrument\\Apps\\EPICS\\ && git fetch origin"
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {hostname}..{host_branch}"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {hostname}..{parent_branch}"
 
     ssh_process_fetch = runSSHCommand(
         hostname, SSH_USERNAME, SSH_PASSWORD, fetch_command)
+    if not ssh_process_fetch['success']:
+        return CHECK.UNDETERMINABLE
+
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
         output = ssh_process['output']
-        # Check if there are any differences in commit history
         if "commit" in output:
             return CHECK.TRUE
         else:
@@ -135,28 +153,22 @@ def check_for_upstream_commits_pending(hostname):
         return CHECK.UNDETERMINABLE
 
 
-def check_for_commits_not_pushed_upstream(hostname):
+def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
     """ Check if there are any commits in NDXMOTION branch missing upstream hotfixes.
 
     Args:
         hostname (str): The hostname to connect to.
+        parent_branch (str): The parent branch of the instrument branch.
 
     Returns:
         CHECK: The result of the check.
     """
-    # if git log has galil-old in it then compare with origin/galil-old else compare with origin/main
-    # Run the command to check if galil-old is in the commit history
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
-    host_branch = ""
-    if ssh_process['success']:
-        if "galil-old" in ssh_process['output']:
-            host_branch = "origin/galil-old"
-        else:
-            host_branch = "origin/main"
+    if parent_branch == "":
+        parent_branch = parent_branch(hostname)
+        if not parent_branch:
+            return CHECK.UNDETERMINABLE
 
-    # Run the command to compare with origin/galil-old and origin/main
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {host_branch}..{hostname}"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {parent_branch}..{hostname}"
 
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
@@ -197,7 +209,7 @@ def check_for_commits_with_prefix(hostname, commit_prefix):
 
 
 def check_instrument(hostname):
-    """ Check if there are any hotfixes or uncomitted changes on AN instrument.
+    """ Check if there are any hotfixes or uncommitted changes on AN instrument.
 
     Args:
         hostname (str): The hostname to connect to.
@@ -205,20 +217,21 @@ def check_instrument(hostname):
     Returns:
         dict: A dictionary with the result of the checks.
     """
-    # Check if any hotfixes run on the instrument
-    pushed_changes_enum = check_for_commits_with_prefix(hostname, "Hotfix:")
+    # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
+    # pushed_changes_enum = check_for_commits_with_prefix(hostname, "Hotfix:")
 
-    # Check if any commits are not pushed upstream on the instrument
-    upstream_commits_enum = check_for_commits_not_pushed_upstream(hostname)
+    # Check if any unpushed commits run on the instrument
+    unpushed_commits_enum = check_for_commits_not_pushed_upstream(
+        hostname, "origin/" + hostname)
 
-    # Check if any upstream commits are not on the instrument
-    upstream_commits_enum = check_for_upstream_commits_pending(hostname)
+    # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old
+    upstream_commits_enum = check_for_unpulled_parents_branch_changes(hostname)
 
     # Check if any uncommitted changes run on the instrument
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
 
     # return the result of the checks
-    instrument_status = {"hotfix_detected": pushed_changes_enum, "upstream_commits_pending_pulling": upstream_commits_enum, "upstream_commits_not_pushed": upstream_commits_enum,
+    instrument_status = {"upstream_commits_pending_pulling": upstream_commits_enum, "commits_not_pushed": unpushed_commits_enum,
                          "uncommitted_changes": uncommitted_changes_enum}
 
     return instrument_status
@@ -258,32 +271,33 @@ def check_instruments():
     else:
         instrument_list = get_instrument_list()
 
-    instrument_status_lists = {"instrument_hotfix_detected": [], "instrument_upstream_commits_pending_pulling": [], "instrument_upstream_commits_not_pushed": [],
-                               "instrument_uncommitted_changes": [], "unreachable_instruments": []}
+    instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
+    ], "unpushed_commits": [], "commits_pending_pulling": []}
 
     for instrument in instrument_list:
         try:
             instrument_status = check_instrument(instrument)
-            print(f"INFO: {instrument} status: {instrument_status}")
-            if instrument_status["hotfix_detected"] == CHECK.TRUE:
-                instrument_status_lists["instrument_hotfix_detected"].append(
-                    instrument)
-            # elif instrument_status["hotfix_detected"] == CHECK.FALSE:
-            #     instrument_status_lists["instrument_no_hotfix"].append(
-            #         instrument)
-            elif instrument_status["hotfix_detected"] == CHECK.UNDETERMINABLE:
-                instrument_status_lists["unreachable_instruments"].append(
-                    instrument)
+            print(f"INFO: {instrument}")
+            print(
+                f"ERROR: Commits not pushed: {instrument_status['commits_not_pushed']}")
+            print(
+                f"ERROR: Uncommitted changes: {instrument_status['uncommitted_changes']}")
+            print(
+                f"WARNING: Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
 
-            if instrument_status["upstream_commits_pending_pulling"] == CHECK.TRUE:
-                instrument_status_lists["instrument_upstream_commits_pending_pulling"].append(
+            if instrument_status['commits_not_pushed'] == CHECK.TRUE:
+                instrument_status_lists["unpushed_commits"].append(instrument)
+            if instrument_status['uncommitted_changes'] == CHECK.TRUE:
+                instrument_status_lists["uncommitted_changes"].append(
                     instrument)
-            if instrument_status["upstream_commits_not_pushed"] == CHECK.TRUE:
-                instrument_status_lists["instrument_upstream_commits_not_pushed"].append(
-                    instrument)
-            if instrument_status["uncommitted_changes"] == CHECK.TRUE:
-                instrument_status_lists["instrument_uncommitted_changes"].append(
-                    instrument)
+            if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
+                instrument_status_lists["unpushed_commits"].append(instrument)
+            for key, value in instrument_status.items():
+                if value == CHECK.UNDETERMINABLE:
+                    print(f"ERROR: Could not determine {key} status")
+                    instrument_status_lists["unreachable_at_some_point"].append(
+                        instrument)
+
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
             instrument_status_lists["unreachable_instruments"].append(
@@ -291,28 +305,21 @@ def check_instruments():
 
     print("INFO: Instrument hotfix checker finished")
 
-    print("INFO: Instruments with hotfix" +
-          str(instrument_status_lists["instrument_hotfix_detected"]))
-    print("INFO: Instruments with upstream commits pending pulling" +
-          str(instrument_status_lists["instrument_upstream_commits_pending_pulling"]))
-    print("INFO: Instruments with upstream commits not pushed" +
-          str(instrument_status_lists["instrument_upstream_commits_not_pushed"]))
-    print("INFO: Instruments with uncommitted changes" +
-          str(instrument_status_lists["instrument_uncommitted_changes"]))
-    print("INFO: Unreachable instruments" +
-          str(instrument_status_lists["unreachable_instruments"]))
-
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
-    if len(instrument_status_lists["instrument_uncommitted_changes"]) > 0:
-        print("ERROR: Uncommitted changes detected on: " +
-              str(instrument_status_lists["instrument_uncommitted_changes"]))
+    if len(instrument_status_lists["uncommitted_changes"]) > 0:
+        print("ERROR: Some instruments have uncommitted changes")
+        print(instrument_status_lists["uncommitted_changes"])
         sys.exit(1)
-    elif len(instrument_status_lists["unreachable_instruments"]) > 0:
-        print("ERROR: Could not connect to: " +
-              str(instrument_status_lists["unreachable_instruments"]))
+    if len(instrument_status_lists["unreachable_at_some_point"]) > 0:
+        print("ERROR: Some instruments are unreachable")
+        print(instrument_status_lists["unreachable_at_some_point"])
         sys.exit(1)
-    else:
-        sys.exit(0)
+    if len(instrument_status_lists["unpushed_commits"]) > 0:
+        print("ERROR: Some instruments have unpushed commits")
+        print(instrument_status_lists["unpushed_commits"])
+        sys.exit(1)
+
+    sys.exit(0)
 
 
 if __name__ == '__main__':
