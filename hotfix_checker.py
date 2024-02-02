@@ -139,12 +139,11 @@ def check_for_commits_not_pushed_upstream(hostname):
     """
     # if git log has galil-old in it then compare with origin/galil-old else compare with origin/main
     # Run the command to check if galil-old is in the commit history
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --grep='galil-old' --oneline | wc -l"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
     host_branch = ""
     if ssh_process['success']:
-        commit_count = int(ssh_process['output'].strip())
-        if commit_count > 0:
+        if "galil-old" in ssh_process['output']:
             host_branch = "origin/galil-old"
         else:
             host_branch = "origin/main"
@@ -249,8 +248,6 @@ def check_instruments():
         None
         """
     print('INFO: Starting instrument hotfix checker')
-    print(f"INFO: Using test instrument list: {USE_TEST_INSTRUMENT_LIST}")
-    print(f"INFO: Test instrument list: {TEST_INSTRUMENT_LIST}")
     if USE_TEST_INSTRUMENT_LIST == "true":
         instrument_list = TEST_INSTRUMENT_LIST.split(",")
         instrument_list = [instrument.strip()
@@ -293,19 +290,16 @@ def check_instruments():
 
     print("INFO: Instrument hotfix checker finished")
 
-    print("INFO: Instruments with hotfixes:")
-    print(instrument_status_lists["instrument_hotfix_detected"])
-    print("INFO: Instruments with no hotfixes:")
-    print(instrument_status_lists["instrument_no_hotfix"])
-    print("INFO: Instruments with upstream commits pending pulling:")
-    print(
-        instrument_status_lists["instrument_upstream_commits_pending_pulling"])
-    print("INFO: Instruments with upstream commits not pushed:")
-    print(instrument_status_lists["instrument_upstream_commits_not_pushed"])
-    print("INFO: Instruments with uncommitted changes:")
-    print(instrument_status_lists["instrument_uncommitted_changes"])
-    print("INFO: Unreachable instruments:")
-    print(instrument_status_lists["unreachable_instruments"])
+    print("INFO: Instruments with hotfix" +
+          instrument_status_lists["instrument_hotfix_detected"])
+    print("INFO: Instruments with upstream commits pending pulling" +
+          instrument_status_lists["instrument_upstream_commits_pending_pulling"])
+    print("INFO: Instruments with upstream commits not pushed" +
+          instrument_status_lists["instrument_upstream_commits_not_pushed"])
+    print("INFO: Instruments with uncommitted changes" +
+          instrument_status_lists["instrument_uncommitted_changes"])
+    print("INFO: Unreachable instruments" +
+          instrument_status_lists["unreachable_instruments"])
 
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
     if len(instrument_status_lists["instrument_uncommitted_changes"]) > 0:
