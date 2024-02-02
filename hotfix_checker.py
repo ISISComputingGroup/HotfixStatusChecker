@@ -249,7 +249,8 @@ def check_instruments():
         None
         """
     print('INFO: Starting instrument hotfix checker')
-
+    print(f"INFO: Using test instrument list: {USE_TEST_INSTRUMENT_LIST}")
+    print(f"INFO: Test instrument list: {TEST_INSTRUMENT_LIST}")
     if USE_TEST_INSTRUMENT_LIST == "True":
         instrument_list = TEST_INSTRUMENT_LIST.split(",")
         instrument_list = [instrument.strip()
