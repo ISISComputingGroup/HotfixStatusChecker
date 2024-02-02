@@ -251,14 +251,15 @@ def check_instruments():
     print('INFO: Starting instrument hotfix checker')
     print(f"INFO: Using test instrument list: {USE_TEST_INSTRUMENT_LIST}")
     print(f"INFO: Test instrument list: {TEST_INSTRUMENT_LIST}")
-    if USE_TEST_INSTRUMENT_LIST == "True":
-        instrument_list = TEST_INSTRUMENT_LIST.split(",")
-        instrument_list = [instrument.strip()
-                           for instrument in instrument_list]
-        if "" in instrument_list:
-            instrument_list.remove("")
-    else:
-        instrument_list = get_instrument_list()
+    # if USE_TEST_INSTRUMENT_LIST == "True":
+    #     instrument_list = TEST_INSTRUMENT_LIST.split(",")
+    #     instrument_list = [instrument.strip()
+    #                        for instrument in instrument_list]
+    #     if "" in instrument_list:
+    #         instrument_list.remove("")
+    # else:
+    #     instrument_list = get_instrument_list()
+    sys.exit(1)
 
     instrument_status_lists = {"instrument_hotfix_detected": [], "instrument_upstream_commits_pending_pulling": [], "instrument_upstream_commits_not_pushed": [],
                                "instrument_uncommitted_changes": [], "unreachable_instruments": []}
