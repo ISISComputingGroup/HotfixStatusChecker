@@ -252,6 +252,8 @@ def check_instruments():
 
     if USE_TEST_INSTRUMENT_LIST == "True":
         instrument_list = TEST_INSTRUMENT_LIST.split(",")
+        instrument_list = [instrument.strip()
+                           for instrument in instrument_list]
     else:
         instrument_list = get_instrument_list()
 
