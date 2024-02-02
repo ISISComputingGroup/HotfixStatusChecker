@@ -15,6 +15,7 @@ pipeline {
     environment {
         EPICS_DIR = 'C:/HotfixStatusChecker/EPICS'
         SSH_CREDENTIALS = credentials('SSH')
+        TEST_INSTRUMENT_LIST = $(TEST_INSTRUMENT_LIST)
     }
 
     stages {

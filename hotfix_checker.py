@@ -10,6 +10,8 @@ REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
 SSH_PORT = 22
 SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
 SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
+USE_TEST_INSTRUMENT_LIST = os.environ["USE_TEST_INSTRUMENT_LIST"]
+TEST_INSTRUMENT_LIST = os.environ["TEST_INSTRUMENT_LIST"]
 
 
 class CHECK(Enum):
@@ -237,7 +239,6 @@ def get_instrument_list():
         instrument_list = ["NDX" + instrument['name']
                            for instrument in instrument_list]
 
-    instrument_list = ['NDXSCIDEMO']
     return instrument_list
 
 
@@ -249,7 +250,10 @@ def check_instruments():
         """
     print('INFO: Starting instrument hotfix checker')
 
-    instrument_list = get_instrument_list()
+    if USE_TEST_INSTRUMENT_LIST == "True":
+        instrument_list = TEST_INSTRUMENT_LIST.split(",")
+    else:
+        instrument_list = get_instrument_list()
 
     instrument_status_lists = {"instrument_hotfix_detected": [], "instrument_upstream_commits_pending_pulling": [], "instrument_upstream_commits_not_pushed": [],
                                "instrument_uncommitted_changes": [], "unreachable_instruments": []}
