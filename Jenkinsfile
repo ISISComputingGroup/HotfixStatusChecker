@@ -9,14 +9,14 @@ pipeline {
     }
 
     triggers {
-        cron('0 8 * * *')
+        cron('H 8 * * *')
     }
 
     environment {
         EPICS_DIR = 'C:/HotfixStatusChecker/EPICS'
         SSH_CREDENTIALS = credentials('SSH')
-        TEST_INSTRUMENT_LIST = $(TEST_INSTRUMENT_LIST)
-        USE_TEST_INSTRUMENT_LIST = $(USE_TEST_INSTRUMENT_LIST)
+        TEST_INSTRUMENT_LIST = "${TEST_INSTRUMENT_LIST}"
+        USE_TEST_INSTRUMENT_LIST = "${USE_TEST_INSTRUMENT_LIST}"
     }
 
     stages {
