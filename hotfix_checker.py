@@ -64,8 +64,10 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
+            print(f"Uncommitted changes detected on {hostname}")
             return CHECK.TRUE
         else:
+            print(f"No uncommitted changes detected on {hostname}")
             return CHECK.FALSE
     else:
         return CHECK.UNDETERMINABLE
@@ -291,15 +293,15 @@ def check_instruments():
     print("INFO: Instrument hotfix checker finished")
 
     print("INFO: Instruments with hotfix" +
-          instrument_status_lists["instrument_hotfix_detected"])
+          str(instrument_status_lists["instrument_hotfix_detected"]))
     print("INFO: Instruments with upstream commits pending pulling" +
-          instrument_status_lists["instrument_upstream_commits_pending_pulling"])
+          str(instrument_status_lists["instrument_upstream_commits_pending_pulling"]))
     print("INFO: Instruments with upstream commits not pushed" +
-          instrument_status_lists["instrument_upstream_commits_not_pushed"])
+          str(instrument_status_lists["instrument_upstream_commits_not_pushed"]))
     print("INFO: Instruments with uncommitted changes" +
-          instrument_status_lists["instrument_uncommitted_changes"])
+          str(instrument_status_lists["instrument_uncommitted_changes"]))
     print("INFO: Unreachable instruments" +
-          instrument_status_lists["unreachable_instruments"])
+          str(instrument_status_lists["unreachable_instruments"]))
 
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
     if len(instrument_status_lists["instrument_uncommitted_changes"]) > 0:
