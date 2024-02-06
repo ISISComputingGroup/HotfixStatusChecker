@@ -236,7 +236,7 @@ def check_instrument(hostname):
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
 
     # return the result of the checks
-    instrument_status = {"upstream_commits_pending_pulling": upstream_commits_enum, "commits_not_pushed_messages": unpushed_commit_messages, "commits_not_pushed": unpushed_commits_enum,
+    instrument_status = {"commits_not_pushed_messages": unpushed_commit_messages, "commits_not_pushed": unpushed_commits_enum,
                          "uncommitted_changes": uncommitted_changes_enum}
 
     return instrument_status
@@ -318,8 +318,8 @@ def check_instruments():
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
                 instrument_status_lists["uncommitted_changes"].append(
                     instrument)
-            if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
-                instrument_status_lists["unpushed_commits"].append(instrument)
+            # if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
+            #     instrument_status_lists["unpushed_commits"].append(instrument)
             for key, value in instrument_status.items():
                 if value == CHECK.UNDETERMINABLE:
                     print(f"ERROR: Could not determine {key} status")
@@ -344,12 +344,12 @@ def check_instruments():
     else:
         print(
             f"Commits not pushed: {instrument_status_lists['unpushed_commits']}")
-    if len(instrument_status_lists['commits_pending_pulling']) > 0:
-        print(
-            f"ERROR: Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
-    else:
-        print(
-            f"Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
+    # if len(instrument_status_lists['commits_pending_pulling']) > 0:
+    #     print(
+    #         f"ERROR: Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
+    # else:
+    #     print(
+    #         f"Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
     if len(instrument_status_lists['unreachable_at_some_point']) > 0:
         print(
             f"ERROR: Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
