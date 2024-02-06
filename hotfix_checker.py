@@ -311,7 +311,7 @@ def check_instruments():
             # else:
             #     print(
             #         f"ERROR: Upstream commits pending pulling: Could not determine upstream commits pending pulling status")
-
+            print(instrument_status)
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
                     instrument_status['commits_not_pushed_messages']))
