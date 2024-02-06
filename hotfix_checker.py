@@ -169,14 +169,14 @@ def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
         if not parent_branch:
             return CHECK.UNDETERMINABLE
 
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --format=\"%s\" origin/{hostname}..HEAD"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --format=\"%h %s\" origin/{hostname}..HEAD"
 
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
         output = ssh_process['output']
         # Check if there are any differences in commit history
-        if "commit" in output:
+        if output.strip() != "":
             commit_messages = output.split("\n")
             return CHECK.TRUE, commit_messages
         else:
