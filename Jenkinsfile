@@ -17,6 +17,7 @@ pipeline {
         SSH_CREDENTIALS = credentials('SSH')
         TEST_INSTRUMENT_LIST = "${TEST_INSTRUMENT_LIST}"
         USE_TEST_INSTRUMENT_LIST = "${USE_TEST_INSTRUMENT_LIST}"
+        DEBUG_MODE = "${DEBUG_MODE}"
     }
 
     stages {
