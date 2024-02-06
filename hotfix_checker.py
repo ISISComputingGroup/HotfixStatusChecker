@@ -186,6 +186,7 @@ def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
         else:
             return CHECK.FALSE, None
     else:
+        print(f"{ssh_process['output']}")
         return CHECK.UNDETERMINABLE, None
 
 
@@ -293,11 +294,11 @@ def check_instruments():
                     instrument)
             # if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
             #     instrument_status_lists["unpushed_commits"].append(instrument)
-            for key, value in instrument_status.items():
-                if value == CHECK.UNDETERMINABLE:
-                    print(f"ERROR: Could not determine {key} status")
-                    instrument_status_lists["unreachable_at_some_point"].append(
-                        instrument)
+            # for key, value in instrument_status.items():
+            #     if value == CHECK.UNDETERMINABLE:
+            #         print(f"ERROR: Could not determine {key} status")
+            #         instrument_status_lists["unreachable_at_some_point"].append(
+            #             instrument)
 
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
