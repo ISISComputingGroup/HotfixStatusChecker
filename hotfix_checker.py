@@ -177,7 +177,10 @@ def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
         output = ssh_process['output']
         # Check if there are any differences in commit history
         if output.strip() != "":
+            # filter the messages to not include emoty ones
             commit_messages = output.split("\n")
+            commit_messages = [
+                message for message in commit_messages if message.strip() != ""]
             return CHECK.TRUE, commit_messages
         else:
             return CHECK.FALSE, None
