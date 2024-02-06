@@ -276,36 +276,36 @@ def check_instruments():
     for instrument in instrument_list:
         try:
             instrument_status = check_instrument(instrument)
-            print(f"INFO: {instrument}")
-            if instrument_status['commits_not_pushed'] == CHECK.TRUE:
-                print(
-                    f"WARNING: Commits not pushed: {instrument_status['commits_not_pushed']}")
-            elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
-                print(
-                    f"Commits not pushed: {instrument_status['commits_not_pushed']}")
-            else:
-                print(
-                    f"ERROR: Commits not pushed: Could not determine commits not pushed status")
+            print(f"INFO: Checking {instrument}")
+            # if instrument_status['commits_not_pushed'] == CHECK.TRUE:
+            #     print(
+            #         f"WARNING: Commits not pushed: {instrument_status['commits_not_pushed']}")
+            # elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
+            #     print(
+            #         f"Commits not pushed: {instrument_status['commits_not_pushed']}")
+            # else:
+            #     print(
+            #         f"ERROR: Commits not pushed: Could not determine commits not pushed status")
 
-            if instrument_status['uncommitted_changes'] == CHECK.TRUE:
-                print(
-                    f"ERROR: Uncommitted changes: {instrument_status['uncommitted_changes']}")
-            elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
-                print(
-                    f"Uncommitted changes: {instrument_status['uncommitted_changes']}")
-            else:
-                print(
-                    f"ERROR: Uncommitted changes: Could not determine uncommitted changes status")
+            # if instrument_status['uncommitted_changes'] == CHECK.TRUE:
+            #     print(
+            #         f"ERROR: Uncommitted changes: {instrument_status['uncommitted_changes']}")
+            # elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
+            #     print(
+            #         f"Uncommitted changes: {instrument_status['uncommitted_changes']}")
+            # else:
+            #     print(
+            #         f"ERROR: Uncommitted changes: Could not determine uncommitted changes status")
 
-            if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
-                print(
-                    f"ERROR: Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
-            elif instrument_status['upstream_commits_pending_pulling'] == CHECK.FALSE:
-                print(
-                    f"Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
-            else:
-                print(
-                    f"ERROR: Upstream commits pending pulling: Could not determine upstream commits pending pulling status")
+            # if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
+            #     print(
+            #         f"ERROR: Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
+            # elif instrument_status['upstream_commits_pending_pulling'] == CHECK.FALSE:
+            #     print(
+            #         f"Upstream commits pending pulling: {instrument_status['upstream_commits_pending_pulling']}")
+            # else:
+            #     print(
+            #         f"ERROR: Upstream commits pending pulling: Could not determine upstream commits pending pulling status")
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument)
@@ -322,17 +322,34 @@ def check_instruments():
 
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
-            instrument_status_lists["unreachable_instruments"].append(
+            instrument_status_lists["unreachable_at_some_point"].append(
                 instrument)
 
     print("INFO: Summary of results")
-    print(
-        f"Uncommitted changes: {instrument_status_lists['uncommitted_changes']}")
-    print(f"Unpushed commits: {instrument_status_lists['unpushed_commits']}")
-    print(
-        f"Upstream commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
-    print(
-        f"Unreachable, at some point, instruments: {instrument_status_lists['unreachable_at_some_point']}")
+    if len(instrument_status_lists['uncommitted_changes']) > 0:
+        print(
+            f"ERROR: Uncommitted changes: {instrument_status_lists['uncommitted_changes']}")
+    else:
+        print(
+            f"Uncommitted changes: {instrument_status_lists['uncommitted_changes']}")
+    if len(instrument_status_lists['unpushed_commits']) > 0:
+        print(
+            f"ERROR: Commits not pushed: {instrument_status_lists['unpushed_commits']}")
+    else:
+        print(
+            f"Commits not pushed: {instrument_status_lists['unpushed_commits']}")
+    if len(instrument_status_lists['commits_pending_pulling']) > 0:
+        print(
+            f"ERROR: Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
+    else:
+        print(
+            f"Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
+    if len(instrument_status_lists['unreachable_at_some_point']) > 0:
+        print(
+            f"ERROR: Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
+    else:
+        print(
+            f"Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
 
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
     if len(instrument_status_lists["uncommitted_changes"]) > 0:
