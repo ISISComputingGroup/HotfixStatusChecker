@@ -162,13 +162,14 @@ def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
 
     Returns:
         CHECK: The result of the check.
+        COMMIT_MESSAGES: The commit messages of the commits not pushed upstream.
     """
     if parent_branch == "":
         parent_branch = parent_branch(hostname)
         if not parent_branch:
             return CHECK.UNDETERMINABLE
 
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {parent_branch}..{hostname}"
+    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --format=\"%s\" origin/{hostname}..HEAD"
 
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
@@ -176,11 +177,12 @@ def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
         output = ssh_process['output']
         # Check if there are any differences in commit history
         if "commit" in output:
-            return CHECK.TRUE
+            commit_messages = output.split("\n")
+            return CHECK.TRUE, commit_messages
         else:
-            return CHECK.FALSE
+            return CHECK.FALSE, None
     else:
-        return CHECK.UNDETERMINABLE
+        return CHECK.UNDETERMINABLE, None
 
 
 def check_for_commits_with_prefix(hostname, commit_prefix):
@@ -221,7 +223,7 @@ def check_instrument(hostname):
     # pushed_changes_enum = check_for_commits_with_prefix(hostname, "Hotfix:")
 
     # Check if any unpushed commits run on the instrument
-    unpushed_commits_enum = check_for_commits_not_pushed_upstream(
+    unpushed_commits_enum, unpushed_commit_messages = check_for_commits_not_pushed_upstream(
         hostname, "origin/" + hostname)
 
     # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old
@@ -231,7 +233,7 @@ def check_instrument(hostname):
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
 
     # return the result of the checks
-    instrument_status = {"upstream_commits_pending_pulling": upstream_commits_enum, "commits_not_pushed": unpushed_commits_enum,
+    instrument_status = {"upstream_commits_pending_pulling": upstream_commits_enum, "commits_not_pushed_messages": unpushed_commit_messages, "commits_not_pushed": unpushed_commits_enum,
                          "uncommitted_changes": uncommitted_changes_enum}
 
     return instrument_status
@@ -308,7 +310,8 @@ def check_instruments():
             #         f"ERROR: Upstream commits pending pulling: Could not determine upstream commits pending pulling status")
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
-                instrument_status_lists["unpushed_commits"].append(instrument)
+                instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
+                    instrument_status['commits_not_pushed_messages']))
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
                 instrument_status_lists["uncommitted_changes"].append(
                     instrument)
