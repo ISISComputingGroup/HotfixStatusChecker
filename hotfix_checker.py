@@ -32,19 +32,24 @@ def getInstsOnLatestIbex():
     url = "https://beamlog.nd.rl.ac.uk/inst_summary.xml"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'xml')
-    print(soup)
-    instruments = soup.find_all("body")[0].find_all("table")[
-        0].find_all("tr")[1:]
-    insts = []
-    for inst in instruments:
-        inst_name = inst.find_all("td")[0].text
-        ibex_version = inst.find_all("td")[6].find_all(
-            "tr")[3].find_all("td")[1].text.trim().split(" ")[0]
-        insts.append({"name": inst_name, "ibex_version": ibex_version})
+    result_list = []
+
+    # Find all inst elements
+    inst_elements = soup.find_all('inst')
+
+    # Iterate over each inst element
+    for inst in inst_elements:
+        name = inst['name']
+        ibex_version = inst.find('ibexclient').text.strip()
+
+        # Create a dictionary and append to the result list
+        result_list.append({'name': name, 'ibex_version': ibex_version})
+        print(f"INFO: Found instrument {name} on IBEX version {ibex_version}")
 
     # filter out the instruments that are not on the latest version of IBEX
-    latest_version = max([inst["ibex_version"] for inst in insts])
-    insts = [inst for inst in insts if inst["ibex_version"] == latest_version]
+    latest_version = max([inst["ibex_version"] for inst in result_list])
+    insts = [inst for inst in result_list if inst["ibex_version"] == latest_version]
+
     return insts
 
 
