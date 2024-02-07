@@ -4,6 +4,8 @@ import sys
 import git
 from util.channel_access import ChannelAccessUtils
 import paramiko
+from bs4 import BeautifulSoup
+import requests
 
 EPICS_DIR = os.environ['EPICS_DIR']
 REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
@@ -19,6 +21,29 @@ class CHECK(Enum):
     UNDETERMINABLE = 0
     TRUE = 1
     FALSE = 2
+
+
+def getInstsOnLatestIbex():
+    """ Get a list of instruments on the latest version of IBEX.
+
+    Returns:
+        list: A list of instruments.
+    """
+    url = "https://beamlog.nd.rl.ac.uk/inst_summary.xml"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    instruments = soup.find_all("table")[0].find_all("tr")[1:]
+    insts = []
+    for inst in instruments:
+        inst_name = inst.find_all("td")[0].text
+        ibex_version = inst.find_all("td")[6].find_all(
+            "tr")[3].find_all("td")[1].text.trim().split(" ")[0]
+        insts.append({"name": inst_name, "ibex_version": ibex_version})
+
+    # filter out the instruments that are not on the latest version of IBEX
+    latest_version = max([inst["ibex_version"] for inst in insts])
+    insts = [inst for inst in insts if inst["ibex_version"] == latest_version]
+    return insts
 
 
 def runSSHCommand(host, username, password, command):
@@ -275,7 +300,9 @@ def check_instruments():
         if "" in instrument_list:
             instrument_list.remove("")
     else:
-        instrument_list = get_instrument_list()
+        # instrument_list = get_instrument_list()
+        instrument_list = ["NDX" + inst["name"]
+                           for inst in getInstsOnLatestIbex()]
 
     instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
     ], "unpushed_commits": [], "commits_pending_pulling": []}
