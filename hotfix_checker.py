@@ -23,7 +23,7 @@ class CHECK(Enum):
     FALSE = 2
 
 
-def getInstsOnLatestIbex():
+def getInstsOnLatestIbexViaWeb():
     """ Get a list of instruments on the latest version of IBEX.
 
     Returns:
@@ -39,24 +39,45 @@ def getInstsOnLatestIbex():
 
     # Iterate over each inst element
     for inst in inst_elements:
-        # print(inst)
         name = inst['name']
-        # Assuming 'IBEXClient' is a child element
         ibex_version = inst.find('IBEXClient').text.strip()
-
         if ibex_version != "":
-
-            # Create a dictionary and append to the result list
             result_list.append({'name': name, 'ibex_version': ibex_version})
             print(
                 f"INFO: Found instrument {name} on IBEX version {ibex_version}")
 
-    # filter out the instruments that are not on the latest version of IBEX
+    # Get the latest version of IBEX
     latest_version = max([int(inst["ibex_version"].split(".")[0])
                          for inst in result_list])
-    # print(f"INFO: Latest version of IBEX is {latest_version}")
+
+    # filter out the instruments that are not on the latest version
     insts = [
         inst["name"] for inst in result_list if int(inst["ibex_version"].split(".")[0]) == latest_version]
+
+    return insts
+
+
+def getInstsOnLatestIbex():
+    instrument_list = ChannelAccessUtils().get_inst_list()
+    result_list = []
+    for instrument in instrument_list:
+        print(instrument)
+        try:
+            version = ChannelAccessUtils().get_value(
+                f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
+            if version is not None:
+                result_list.append(
+                    {'name': instrument['name'], 'version': version})
+        except:
+            print(f"Could not get version for {instrument['name']}")
+
+    # Get the latest version of IBEX
+    latest_version = max([int(inst["version"].split(".")[0])
+                         for inst in result_list])
+
+    # filter out the instruments that are not on the latest version
+    insts = [
+        inst["name"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
 
     return insts
 
