@@ -39,7 +39,7 @@ def getInstsOnLatestIbex():
 
     # Iterate over each inst element
     for inst in inst_elements:
-        print(inst)
+        # print(inst)
         name = inst['name']
         # Assuming 'IBEXClient' is a child element
         ibex_version = inst.find('IBEXClient').text.strip()
