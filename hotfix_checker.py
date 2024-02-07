@@ -44,6 +44,9 @@ def getInstsOnLatestIbex():
         # Assuming 'IBEXClient' is a child element
         ibex_version = inst.find('IBEXClient').text.strip()
 
+        if ibex_version != "":
+            continue
+
         # Create a dictionary and append to the result list
         result_list.append({'name': name, 'ibex_version': ibex_version})
         print(f"INFO: Found instrument {name} on IBEX version {ibex_version}")
