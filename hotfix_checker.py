@@ -64,20 +64,20 @@ def getInstsOnLatestIbexViaInstCongif():
         print(instrument)
         if not instrument['seci']:
             version = requests.get(
-                "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['name']).text
+                "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['hostName']).text
             version = int(version.strip().split(".")[0])
             print(
                 f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
             if version is not None and version != "None" and version != "":
                 result_list.append(
-                    {'name': instrument['hostName'], 'version': version})
+                    {'hostname': instrument['hostName'], 'version': version})
 
     # Get the latest version of IBEX
     latest_version = max([int(inst["version"].split(".")[0])
                          for inst in result_list])
 
     # filter out the instruments that are not on the latest version
-    insts = [inst["name"] for inst in result_list if int(
+    insts = [inst["hostname"] for inst in result_list if int(
         inst["version"].split(".")[0]) == latest_version]
 
 
