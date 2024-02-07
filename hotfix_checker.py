@@ -61,7 +61,7 @@ def getInstsOnLatestIbexViaInstCongif():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        print(instrument)
+        # print(instrument)
         if not instrument['seci']:
             version = requests.get(
                 "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['hostName']).text
