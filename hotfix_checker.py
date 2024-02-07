@@ -40,7 +40,7 @@ def getInstsOnLatestIbex():
     # Iterate over each inst element
     for inst in inst_elements:
         name = inst['name']
-        ibex_version = inst.find('ibexclient').text.strip()
+        ibex_version = inst['ibex_version']
 
         # Create a dictionary and append to the result list
         result_list.append({'name': name, 'ibex_version': ibex_version})
