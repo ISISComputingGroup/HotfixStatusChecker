@@ -45,11 +45,11 @@ def getInstsOnLatestIbex():
         ibex_version = inst.find('IBEXClient').text.strip()
 
         if ibex_version != "":
-            continue
 
-        # Create a dictionary and append to the result list
-        result_list.append({'name': name, 'ibex_version': ibex_version})
-        print(f"INFO: Found instrument {name} on IBEX version {ibex_version}")
+            # Create a dictionary and append to the result list
+            result_list.append({'name': name, 'ibex_version': ibex_version})
+            print(
+                f"INFO: Found instrument {name} on IBEX version {ibex_version}")
 
     # filter out the instruments that are not on the latest version of IBEX
     latest_version = max([int(inst["ibex_version"].split(".")[0])
