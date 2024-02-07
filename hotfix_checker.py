@@ -39,6 +39,7 @@ def getInstsOnLatestIbex():
 
     # Iterate over each inst element
     for inst in inst_elements:
+        print(inst)
         name = inst['name']
         ibex_version = inst['ibexclient']
 
