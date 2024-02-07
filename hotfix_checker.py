@@ -66,7 +66,7 @@ def getInstsOnLatestIbex():
         print(version)
         if version is not None and version != "None" and version != "":
             result_list.append(
-                {'name': instrument['hostname'], 'version': version})
+                {'name': instrument['hostName'], 'version': version})
 
     # Get the latest version of IBEX
     latest_version = max([int(inst["version"].split(".")[0])
