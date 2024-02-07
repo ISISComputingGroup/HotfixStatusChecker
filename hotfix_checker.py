@@ -61,6 +61,7 @@ def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
+        print(instrument)
         if instrument['seci'] == "False":
             version = ChannelAccessUtils().get_value(
                 f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
