@@ -64,10 +64,10 @@ def getInstsOnLatestIbex():
         if instrument['seci'] == "False":
             version = ChannelAccessUtils().get_value(
                 f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
-            print(version)
             if version is not None and version != "None" and version != "":
                 result_list.append(
                     {'name': instrument['hostName'], 'version': version})
+                print("Instrument " + instrument['hostName'] + " is on version " + version)
 
     # Get the latest version of IBEX
     latest_version = max([int(inst["version"].split(".")[0])
@@ -80,7 +80,7 @@ def getInstsOnLatestIbex():
     return insts
 
 
-def runSSHCommand(host, username, password, command):
+def runSSHCommand(host, username, password, command)
     """ Run a command on a remote host using SSH.
 
     Args:
