@@ -61,15 +61,12 @@ def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        try:
-            version = ChannelAccessUtils().get_value(
-                f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
-            print(version)
-            if version is not None:
-                result_list.append(
-                    {'name': instrument['hostname'], 'version': version})
-        except:
-            print(f"Could not get version for {instrument['name']}")
+        version = ChannelAccessUtils().get_value(
+            f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
+        print(version)
+        if version is not None and version != "None" and version != "":
+            result_list.append(
+                {'name': instrument['hostname'], 'version': version})
 
     # Get the latest version of IBEX
     latest_version = max([int(inst["version"].split(".")[0])
