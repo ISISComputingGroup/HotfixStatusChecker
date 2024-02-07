@@ -66,8 +66,8 @@ def getInstsOnLatestIbexViaInstCongif():
             version = requests.get(
                 "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['hostName']).text
             version = int(version.strip().split(".")[0])
-            print(
-                f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
+            # print(
+            #     f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
             if version is not None and version != "None" and version != "":
                 result_list.append(
                     {'hostname': instrument['hostName'], 'version': version})
