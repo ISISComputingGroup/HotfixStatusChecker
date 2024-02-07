@@ -73,7 +73,7 @@ def getInstsOnLatestIbexViaInstCongif():
                     {'hostname': instrument['hostName'], 'version': version})
 
     # Get the latest version of IBEX
-    latest_version = max([inst["version"])
+    latest_version = max([inst["version"]
                          for inst in result_list])
 
     # filter out the instruments that are not on the latest version
