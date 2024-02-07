@@ -57,6 +57,30 @@ def getInstsOnLatestIbexViaWeb():
     return insts
 
 
+def getInstsOnLatestIbexViaInstCongif():
+    instrument_list = ChannelAccessUtils().get_inst_list()
+    result_list = []
+    for instrument in instrument_list:
+        print(instrument)
+        if not instrument['seci']:
+            version = requests.get(
+                "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['name']).text
+            version = int(version.strip().split(".")[0])
+            print(
+                f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
+            if version is not None and version != "None" and version != "":
+                result_list.append(
+                    {'name': instrument['hostName'], 'version': version})
+
+    # Get the latest version of IBEX
+    latest_version = max([int(inst["version"].split(".")[0])
+                         for inst in result_list])
+
+    # filter out the instruments that are not on the latest version
+    insts = [inst["name"] for inst in result_list if int(
+        inst["version"].split(".")[0]) == latest_version]
+
+
 def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
@@ -337,7 +361,8 @@ def check_instruments():
             instrument_list.remove("")
     else:
         # instrument_list = get_instrument_list()
-        instrument_list = getInstsOnLatestIbex()
+        # instrument_list = getInstsOnLatestIbex()
+        instrument_list = getInstsOnLatestIbexViaInstCongif()
 
     instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
     ], "unpushed_commits": [], "commits_pending_pulling": []}
