@@ -80,6 +80,8 @@ def getInstsOnLatestIbexViaInstCongif():
     insts = [inst["hostname"] for inst in result_list if
              inst["version"] == latest_version]
 
+    return insts
+
 
 def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
