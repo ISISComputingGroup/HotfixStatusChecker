@@ -41,7 +41,8 @@ def getInstsOnLatestIbex():
     for inst in inst_elements:
         print(inst)
         name = inst['name']
-        ibex_version = inst['IBEXClient']
+        # Assuming 'IBEXClient' is a child element
+        ibex_version = inst.find('IBEXClient').text.strip()
 
         # Create a dictionary and append to the result list
         result_list.append({'name': name, 'ibex_version': ibex_version})
@@ -49,7 +50,8 @@ def getInstsOnLatestIbex():
 
     # filter out the instruments that are not on the latest version of IBEX
     latest_version = max([inst["ibex_version"] for inst in result_list])
-    insts = [inst for inst in result_list if inst["ibex_version"] == latest_version]
+    insts = [
+        "NDX" + inst for inst in result_list if inst["ibex_version"] == latest_version]
 
     return insts
 
@@ -309,8 +311,7 @@ def check_instruments():
             instrument_list.remove("")
     else:
         # instrument_list = get_instrument_list()
-        instrument_list = ["NDX" + inst["name"]
-                           for inst in getInstsOnLatestIbex()]
+        instrument_list = getInstsOnLatestIbex()
 
     instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
     ], "unpushed_commits": [], "commits_pending_pulling": []}
