@@ -78,7 +78,7 @@ def getInstsOnLatestIbexViaInstCongif():
 
     # filter out the instruments that are not on the latest version
     insts = [inst["hostname"] for inst in result_list if
-        inst["version"]) == latest_version]
+             inst["version"] == latest_version]
 
 
 def getInstsOnLatestIbex():
