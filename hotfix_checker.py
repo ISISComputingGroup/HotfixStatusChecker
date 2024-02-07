@@ -49,7 +49,7 @@ def getInstsOnLatestIbex():
         print(f"INFO: Found instrument {name} on IBEX version {ibex_version}")
 
     # filter out the instruments that are not on the latest version of IBEX
-    latest_version = max([inst["ibex_version"].split(".")[0]
+    latest_version = max([int(inst["ibex_version"].split(".")[0])
                          for inst in result_list])
     print(f"INFO: Latest version of IBEX is {latest_version}")
     insts = [
