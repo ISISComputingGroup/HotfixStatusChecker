@@ -51,7 +51,7 @@ def getInstsOnLatestIbex():
     # filter out the instruments that are not on the latest version of IBEX
     latest_version = max([inst["ibex_version"] for inst in result_list])
     insts = [
-        "NDX" + inst["name"] for inst in result_list if inst["ibex_version"] == latest_version]
+        inst["name"] for inst in result_list if inst["ibex_version"] == latest_version]
 
     return insts
 
