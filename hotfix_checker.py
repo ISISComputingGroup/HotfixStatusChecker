@@ -77,7 +77,7 @@ def getInstsOnLatestIbex():
 
     # filter out the instruments that are not on the latest version
     insts = [
-        inst["hostname"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
+        inst["hostName"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
 
     return insts
 
