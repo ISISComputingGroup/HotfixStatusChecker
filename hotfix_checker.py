@@ -56,7 +56,7 @@ def getInstsOnLatestIbex():
                          for inst in result_list])
     print(f"INFO: Latest version of IBEX is {latest_version}")
     insts = [
-        inst["name"] for inst in result_list if inst["ibex_version"] == latest_version]
+        inst["name"] for inst in result_list if inst["ibex_version"].split(".")[0] == latest_version]
 
     return insts
 
