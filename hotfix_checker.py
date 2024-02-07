@@ -61,10 +61,10 @@ def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        print(instrument)
         try:
             version = ChannelAccessUtils().get_value(
                 f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
+            print(version)
             if version is not None:
                 result_list.append(
                     {'name': instrument['hostname'], 'version': version})
