@@ -373,22 +373,23 @@ def check_instruments():
         try:
             instrument_status = check_instrument(instrument)
             print(f"INFO: Checking {instrument}")
+
             if DEBUG_MODE == "true":
                 print("DEBUG: " + str(instrument_status))
+
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
                     instrument_status['commits_not_pushed_messages']))
+            elif instrument_status['commits_not_pushed'] == CHECK.UNDETERMINABLE:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
+
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
                 instrument_status_lists["uncommitted_changes"].append(
                     instrument)
-            # if instrument_status['upstream_commits_pending_pulling'] == CHECK.TRUE:
-            #     instrument_status_lists["unpushed_commits"].append(instrument)
-            # for key, value in instrument_status.items():
-            #     if value == CHECK.UNDETERMINABLE:
-            #         print(f"ERROR: Could not determine {key} status")
-            #         instrument_status_lists["unreachable_at_some_point"].append(
-            #             instrument)
-
+            elif instrument_status['uncommitted_changes'] == CHECK.UNDETERMINABLE:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
             instrument_status_lists["unreachable_at_some_point"].append(
