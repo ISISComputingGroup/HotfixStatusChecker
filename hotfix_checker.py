@@ -67,7 +67,7 @@ def getInstsOnLatestIbex():
                 f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
             if version is not None:
                 result_list.append(
-                    {'name': instrument['name'], 'version': version})
+                    {'name': instrument['hostname'], 'version': version})
         except:
             print(f"Could not get version for {instrument['name']}")
 
@@ -77,7 +77,7 @@ def getInstsOnLatestIbex():
 
     # filter out the instruments that are not on the latest version
     insts = [
-        inst["name"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
+        inst["hostname"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
 
     return insts
 
