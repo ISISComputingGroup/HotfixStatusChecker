@@ -32,7 +32,8 @@ def getInstsOnLatestIbex():
     url = "https://beamlog.nd.rl.ac.uk/inst_summary.xml"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
-    instruments = soup.find_all("table")[0].find_all("tr")[1:]
+    instruments = soup.find_all("body")[0].find_all("table")[
+        0].find_all("tr")[1:]
     insts = []
     for inst in instruments:
         inst_name = inst.find_all("td")[0].text
