@@ -87,12 +87,12 @@ def getInstsOnLatestIbex():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        print(instrument)
+        # print(instrument)
         if not instrument['seci']:
             version = ChannelAccessUtils().get_value(
                 f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
-            print(
-                f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
+            # print(
+            #     f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
             if version is not None and version != "None" and version != "":
                 result_list.append(
                     {'name': instrument['hostName'], 'version': version})
@@ -374,7 +374,7 @@ def check_instruments():
             instrument_status = check_instrument(instrument)
             print(f"INFO: Checking {instrument}")
             if DEBUG_MODE == "true":
-                print(instrument_status)
+                print("DEBUG: " + str(instrument_status))
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
                     instrument_status['commits_not_pushed_messages']))
