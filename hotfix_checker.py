@@ -239,23 +239,23 @@ def check_instruments():
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"][instrument] = [
-                    CHECK.TRUE, instrument_status['commits_not_pushed_messages']]
-            elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
-                instrument_status_lists["unpushed_commits"][instrument] = [
-                    CHECK.FALSE, None]
+                    "True", instrument_status['commits_not_pushed_messages']]
+            # elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
+            #     instrument_status_lists["unpushed_commits"][instrument] = [
+            #         CHECK.FALSE, None]
             else:
                 instrument_status_lists["unpushed_commits"][instrument] = [
-                    CHECK.UNDETERMINABLE, None]
+                    "Undeterminable", None]
 
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
                 instrument_status_lists["uncommitted_changes"][instrument] = [
-                    CHECK.TRUE]
-            elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
-                instrument_status_lists["uncommitted_changes"][instrument] = [
-                    CHECK.FALSE]
+                    "True"]
+            # elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
+            #     instrument_status_lists["uncommitted_changes"][instrument] = [
+            #         CHECK.FALSE]
             else:
                 instrument_status_lists['uncommitted_changes'][instrument] = [
-                    CHECK.UNDETERMINABLE]
+                    "Undeterminable"]
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
 
