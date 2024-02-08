@@ -1,7 +1,6 @@
 from enum import Enum
 import os
 import sys
-import git
 from util.channel_access import ChannelAccessUtils
 import paramiko
 import requests
@@ -33,8 +32,6 @@ def get_insts_on_latest_ibex_via_inst_congif():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        if DEBUG_MODE:
-            print(f"DEBUG: Checking instrument {instrument}")
         if not instrument['seci']:
             version = requests.get(
                 INST_CONFIG_VERSION_TXT_RAW_DATA_URL + instrument['hostName']).text
@@ -189,6 +186,7 @@ def check_instrument(hostname):
     Returns:
         dict: A dictionary with the result of the checks.
     """
+    # Examples of how to use the git_log_analyszer function decided to not be used in this iteration of the check
     # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
     # hotfix_commits_enum, hotfix_commits_messages = git_log_analyszer(
     #     hostname, prefix="Hotfix:")
