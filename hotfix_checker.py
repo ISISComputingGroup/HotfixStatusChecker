@@ -226,8 +226,8 @@ def check_instruments():
     else:
         instrument_list = get_insts_on_latest_ibex_via_inst_congif()
 
-    instrument_status_lists = {
-        "uncommitted_changes": {}, "unpushed_commits": {}}
+    instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
+    ], "unpushed_commits": []}
 
     for instrument in instrument_list:
         try:
@@ -238,26 +238,23 @@ def check_instruments():
                 print("DEBUG: " + str(instrument_status))
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
-                instrument_status_lists["unpushed_commits"][instrument] = [
-                    "True", instrument_status['commits_not_pushed_messages']]
-            # elif instrument_status['commits_not_pushed'] == CHECK.FALSE:
-            #     instrument_status_lists["unpushed_commits"][instrument] = [
-            #         CHECK.FALSE, None]
-            else:
-                instrument_status_lists["unpushed_commits"][instrument] = [
-                    "Undeterminable", None]
+                instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
+                    instrument_status['commits_not_pushed_messages']))
+            elif instrument_status['commits_not_pushed'] == CHECK.UNDETERMINABLE and instrument not in instrument_status_lists["unreachable_at_some_point"]:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
 
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
-                instrument_status_lists["uncommitted_changes"][instrument] = [
-                    "True"]
-            # elif instrument_status['uncommitted_changes'] == CHECK.FALSE:
-            #     instrument_status_lists["uncommitted_changes"][instrument] = [
-            #         CHECK.FALSE]
-            else:
-                instrument_status_lists['uncommitted_changes'][instrument] = [
-                    "Undeterminable"]
+                instrument_status_lists["uncommitted_changes"].append(
+                    instrument)
+            elif instrument_status['uncommitted_changes'] == CHECK.UNDETERMINABLE and instrument not in instrument_status_lists["unreachable_at_some_point"]:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
+            if instrument not in instrument_status_lists["unreachable_at_some_point"]:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
 
     print("INFO: Summary of results")
     if len(instrument_status_lists['uncommitted_changes']) > 0:
@@ -273,8 +270,17 @@ def check_instruments():
         print(
             f"Commits not pushed: {instrument_status_lists['unpushed_commits']}")
 
+    if len(instrument_status_lists['unreachable_at_some_point']) > 0:
+        print(
+            f"ERROR: Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
+    else:
+        print(
+            f"Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
+
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
     if len(instrument_status_lists["uncommitted_changes"]) > 0:
+        sys.exit(1)
+    if len(instrument_status_lists["unreachable_at_some_point"]) > 0:
         sys.exit(1)
     if len(instrument_status_lists["unpushed_commits"]) > 0:
         sys.exit(1)
