@@ -2,7 +2,7 @@ from enum import Enum
 import os
 import sys
 from util.channel_access import ChannelAccessUtils
-from util.ssh_access import runSSHCommand
+from util.ssh_access import SSHAccessUtils
 import requests
 
 EPICS_DIR = "C:\\Instrument\\Apps\\EPICS\\"
@@ -64,7 +64,8 @@ def check_for_uncommitted_changes(hostname):
         CHECK: The result of the check.
     """
     command = f"cd {EPICS_DIR} && git status --porcelain"
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    ssh_process = SSHAccessUtils.runSSHCommand(
+        hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
         if ssh_process['output'].strip() != "":
@@ -86,7 +87,8 @@ def get_parent_branch(hostname):
         str: The name of the parent branch.
     """
     command = f"cd {EPICS_DIR} && git log"
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    ssh_process = SSHAccessUtils.runSSHCommand(
+        hostname, SSH_USERNAME, SSH_PASSWORD, command)
     if ssh_process['success']:
         if "galil-old" in ssh_process['output']:
             return "origin/galil-old"
@@ -117,14 +119,15 @@ def git_log_analyszer(hostname, changes_on=None, subtracted_against=None, prefix
 
     # fetch latest changes from the remote
     fetch_command = f"cd {EPICS_DIR} && git fetch origin"
-    ssh_process_fetch = runSSHCommand(
+    ssh_process_fetch = SSHAccessUtils.runSSHCommand(
         hostname, SSH_USERNAME, SSH_PASSWORD, fetch_command)
     if not ssh_process_fetch['success']:
         return CHECK.UNDETERMINABLE, None
 
     command = f"cd {EPICS_DIR} && git log --format=\"%h %s\" {branch_details}"
 
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+    ssh_process = SSHAccessUtils.runSSHCommand(
+        hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     commit_dict = {}
 
