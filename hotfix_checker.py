@@ -231,8 +231,8 @@ def check_instruments():
 
     for instrument in instrument_list:
         try:
-            instrument_status = check_instrument(instrument)
             print(f"INFO: Checking {instrument}")
+            instrument_status = check_instrument(instrument)
 
             if DEBUG_MODE:
                 print("DEBUG: " + str(instrument_status))
@@ -240,14 +240,14 @@ def check_instruments():
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
                 instrument_status_lists["unpushed_commits"].append(instrument + " " + str(
                     instrument_status['commits_not_pushed_messages']))
-            elif instrument_status['commits_not_pushed'] == CHECK.UNDETERMINABLE:
+            elif instrument_status['commits_not_pushed'] == CHECK.UNDETERMINABLE and instrument not in instrument_status_lists["unreachable_at_some_point"]:
                 instrument_status_lists["unreachable_at_some_point"].append(
                     instrument)
 
             if instrument_status['uncommitted_changes'] == CHECK.TRUE:
                 instrument_status_lists["uncommitted_changes"].append(
                     instrument)
-            elif instrument_status['uncommitted_changes'] == CHECK.UNDETERMINABLE:
+            elif instrument_status['uncommitted_changes'] == CHECK.UNDETERMINABLE and instrument not in instrument_status_lists["unreachable_at_some_point"]:
                 instrument_status_lists["unreachable_at_some_point"].append(
                     instrument)
         except Exception as e:
