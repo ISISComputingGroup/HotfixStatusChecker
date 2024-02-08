@@ -1,5 +1,7 @@
 import paramiko
 
+SSH_PORT = 22
+
 
 class SSHAccessUtils(object):
 

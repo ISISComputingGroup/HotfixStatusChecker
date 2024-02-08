@@ -6,7 +6,6 @@ from util.ssh_access import SSHAccessUtils
 import requests
 
 EPICS_DIR = "C:\\Instrument\\Apps\\EPICS\\"
-SSH_PORT = 22
 SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
 SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
 
