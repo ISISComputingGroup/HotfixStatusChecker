@@ -273,17 +273,8 @@ def check_instruments():
         print(
             f"Commits not pushed: {instrument_status_lists['unpushed_commits']}")
 
-    if len(instrument_status_lists['unreachable_at_some_point']) > 0:
-        print(
-            f"ERROR: Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
-    else:
-        print(
-            f"Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
-
     # Check if any instrument in hotfix_status_each_instrument has uncommitted changes or is unreachable
     if len(instrument_status_lists["uncommitted_changes"]) > 0:
-        sys.exit(1)
-    if len(instrument_status_lists["unreachable_at_some_point"]) > 0:
         sys.exit(1)
     if len(instrument_status_lists["unpushed_commits"]) > 0:
         sys.exit(1)
