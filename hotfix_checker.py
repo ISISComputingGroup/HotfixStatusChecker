@@ -169,7 +169,7 @@ def git_log_analyszer(hostname, changes_on=None, subtracted_against=None, prefix
             split_line = line.split(" ", 1)
             hash = split_line[0]
             message = split_line[1]
-            if message.startswith(prefix) or prefix == None:
+            if prefix == None or message.startswith(prefix):
                 commit_dict[hash] = message
     else:
         return CHECK.UNDETERMINABLE, None
