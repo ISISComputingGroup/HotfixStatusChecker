@@ -4,17 +4,18 @@ import sys
 import git
 from util.channel_access import ChannelAccessUtils
 import paramiko
-from bs4 import BeautifulSoup
 import requests
 
-EPICS_DIR = os.environ['EPICS_DIR']
-REMOTE_URL = 'https://github.com/ISISComputingGroup/EPICS'
+EPICS_DIR = "C:\\Instrument\\Apps\\EPICS\\"
 SSH_PORT = 22
 SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
 SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
-USE_TEST_INSTRUMENT_LIST = os.environ["USE_TEST_INSTRUMENT_LIST"]
+
+USE_TEST_INSTRUMENT_LIST = os.environ["USE_TEST_INSTRUMENT_LIST"] == "true"
 TEST_INSTRUMENT_LIST = os.environ["TEST_INSTRUMENT_LIST"]
-DEBUG_MODE = os.environ["DEBUG_MODE"]
+INST_CONFIG_VERSION_TXT_RAW_DATA_URL = "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/"
+
+DEBUG_MODE = os.environ["DEBUG_MODE"] == "true"
 
 
 class CHECK(Enum):
@@ -23,89 +24,37 @@ class CHECK(Enum):
     FALSE = 2
 
 
-def getInstsOnLatestIbexViaWeb():
-    """ Get a list of instruments on the latest version of IBEX.
+def get_insts_on_latest_ibex_via_inst_congif():
+    """ Get a list of instruments that are on the latest version of IBEX via the inst_config file.
 
     Returns:
-        list: A list of instruments.
+        list: A list of instruments that are on the latest version of IBEX.
     """
-    url = "https://beamlog.nd.rl.ac.uk/inst_summary.xml"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'xml')
-    result_list = []
-
-    # Find all inst elements
-    inst_elements = soup.find_all('inst')
-
-    # Iterate over each inst element
-    for inst in inst_elements:
-        name = inst['name']
-        ibex_version = inst.find('IBEXClient').text.strip()
-        if ibex_version != "":
-            result_list.append({'name': name, 'ibex_version': ibex_version})
-            print(
-                f"INFO: Found instrument {name} on IBEX version {ibex_version}")
-
-    # Get the latest version of IBEX
-    latest_version = max([int(inst["ibex_version"].split(".")[0])
-                         for inst in result_list])
-
-    # filter out the instruments that are not on the latest version
-    insts = [
-        inst["name"] for inst in result_list if int(inst["ibex_version"].split(".")[0]) == latest_version]
-
-    return insts
-
-
-def getInstsOnLatestIbexViaInstCongif():
     instrument_list = ChannelAccessUtils().get_inst_list()
     result_list = []
     for instrument in instrument_list:
-        # print(instrument)
+        if DEBUG_MODE:
+            print(f"DEBUG: Checking instrument {instrument}")
         if not instrument['seci']:
             version = requests.get(
-                "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/" + instrument['hostName']).text
-            version = int(version.strip().split(".")[0])
-            # print(
-            #     f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
-            if version is not None and version != "None" and version != "":
+                INST_CONFIG_VERSION_TXT_RAW_DATA_URL + instrument['hostName']).text
+            version_first_number = int(version.strip().split(".")[0])
+            if DEBUG_MODE:
+                print(
+                    f"DEBUG: Found instrument {instrument['name']} on IBEX version {version_first_number}")
+            if version_first_number is not None and version_first_number != "None" and version_first_number != "":
                 result_list.append(
-                    {'hostname': instrument['hostName'], 'version': version})
+                    {'hostname': instrument['hostName'], 'version': version_first_number})
 
     # Get the latest version of IBEX
     latest_version = max([inst["version"]
                          for inst in result_list])
 
     # filter out the instruments that are not on the latest version
-    insts = [inst["hostname"] for inst in result_list if
-             inst["version"] == latest_version]
+    insts_on_latest_ibex = [inst["hostname"] for inst in result_list if
+                            inst["version"] == latest_version]
 
-    return insts
-
-
-def getInstsOnLatestIbex():
-    instrument_list = ChannelAccessUtils().get_inst_list()
-    result_list = []
-    for instrument in instrument_list:
-        # print(instrument)
-        if not instrument['seci']:
-            version = ChannelAccessUtils().get_value(
-                f"IN:{instrument['name']}:CS:VERSION:SVN:REV")
-            # print(
-            #     f"INFO: Found instrument {instrument['name']} on IBEX version {version}")
-            if version is not None and version != "None" and version != "":
-                result_list.append(
-                    {'name': instrument['hostName'], 'version': version})
-
-    # Get the latest version of IBEX
-    latest_version = max([int(inst["version"].split(".")[0])
-                         for inst in result_list])
-
-    # filter out the instruments that are not on the latest version
-    insts = [
-        inst["name"] for inst in result_list if int(inst["version"].split(".")[0]) == latest_version]
-
-    return insts
+    return insts_on_latest_ibex
 
 
 def runSSHCommand(host, username, password, command):
@@ -147,7 +96,7 @@ def check_for_uncommitted_changes(hostname):
     Returns:
         CHECK: The result of the check.
     """
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git status --porcelain"
+    command = f"cd {EPICS_DIR} && git status --porcelain"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
@@ -160,33 +109,6 @@ def check_for_uncommitted_changes(hostname):
         return CHECK.UNDETERMINABLE
 
 
-def check_for_pushed_changes(hostname):
-    """ Check if there are any hotfixes on the instrument via SSH.
-
-    Args:
-        hostname (str): The hostname to connect to.
-
-    Returns:
-        CHECK: The result of the check.
-    """
-    repo = git.Repo(EPICS_DIR)
-    repo.git.fetch()
-    repo.git.pull()
-    try:
-        repo.git.checkout(hostname)
-    except git.GitCommandError:
-        print(f"Could not checkout branch '{hostname}'")
-        return CHECK.UNDETERMINABLE
-
-    repo.git.pull()
-
-    commits = repo.git.rev_list('--count', hostname)
-    if int(commits) > 1:
-        return CHECK.TRUE
-    else:
-        return CHECK.FALSE
-
-
 def get_parent_branch(hostname):
     """ Get the parent branch of the instrument branch.
 
@@ -196,7 +118,7 @@ def get_parent_branch(hostname):
     Returns:
         str: The name of the parent branch.
     """
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
+    command = f"cd {EPICS_DIR} && git log"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
     if ssh_process['success']:
         if "galil-old" in ssh_process['output']:
@@ -207,99 +129,55 @@ def get_parent_branch(hostname):
         return False
 
 
-def check_for_unpulled_parents_branch_changes(hostname):
-    """ Check if there are any upstream commits waiting to be pulled into the local NDXMOTION branch.
+def git_log_analyszer(hostname, changes_on=None, subtracted_against=None, prefix=None):
+    """ Get the commit messages between two branches on the instrument.
 
     Args:
         hostname (str): The hostname to connect to.
+        changes_on (str): The branch to start from.
+        subtracted_against (str): The branch to end at.
+        prefix (str): The prefix to check for in commit messages.
 
     Returns:
         CHECK: The result of the check.
+        dict: A dictionary with the commit messages and their hashes.
     """
-    # Get the parent branch of the instrument branch
-    parent_branch = get_parent_branch(hostname)
-    if not parent_branch:
-        return CHECK.UNDETERMINABLE
-    # Run the command to check for upstream commits
-    fetch_command = "cd C:\\Instrument\\Apps\\EPICS\\ && git fetch origin"
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log {hostname}..{parent_branch}"
+    branch_details = None
+    if changes_on and subtracted_against:
+        branch_details = f"{subtracted_against}..{changes_on}"
+    else:
+        branch_details = ""
 
+    # fetch latest changes from the remote
+    fetch_command = f"cd {EPICS_DIR} && git fetch origin"
     ssh_process_fetch = runSSHCommand(
         hostname, SSH_USERNAME, SSH_PASSWORD, fetch_command)
     if not ssh_process_fetch['success']:
-        return CHECK.UNDETERMINABLE
-
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
-
-    if ssh_process['success']:
-        output = ssh_process['output']
-        if "commit" in output:
-            return CHECK.TRUE
-        else:
-            return CHECK.FALSE
-    else:
-        return CHECK.UNDETERMINABLE
-
-
-def check_for_commits_not_pushed_upstream(hostname, parent_branch=""):
-    """ Check if there are any commits in NDXMOTION branch missing upstream hotfixes.
-
-    Args:
-        hostname (str): The hostname to connect to.
-        parent_branch (str): The parent branch of the instrument branch.
-
-    Returns:
-        CHECK: The result of the check.
-        COMMIT_MESSAGES: The commit messages of the commits not pushed upstream.
-    """
-    if parent_branch == "":
-        parent_branch = parent_branch(hostname)
-        if not parent_branch:
-            return CHECK.UNDETERMINABLE
-
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log --format=\"%h %s\" origin/{hostname}..HEAD"
-
-    ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
-
-    if ssh_process['success']:
-        output = ssh_process['output']
-        # Check if there are any differences in commit history
-        if output.strip() != "":
-            # filter the messages to not include emoty ones
-            commit_messages = output.split("\n")
-            commit_messages = [
-                message for message in commit_messages if message.strip() != ""]
-            return CHECK.TRUE, commit_messages
-        else:
-            return CHECK.FALSE, None
-    else:
-        print(f"{ssh_process['output']}")
         return CHECK.UNDETERMINABLE, None
 
+    command = f"cd {EPICS_DIR} && git log --format=\"%h %s\" {branch_details}"
 
-def check_for_commits_with_prefix(hostname, commit_prefix):
-    """ Check if there are any commits with a specific prefix on the instrument via SSH.
-
-    Args:
-        hostname (str): The hostname to connect to.
-        commit_prefix (str): The prefix to check for in commit messages.
-
-    Returns:
-        CHECK: The result of the check.
-    """
-    command = f"cd C:\\Instrument\\Apps\\EPICS\\ && git log"
     ssh_process = runSSHCommand(hostname, SSH_USERNAME, SSH_PASSWORD, command)
+
+    commit_dict = {}
 
     if ssh_process['success']:
         output = ssh_process['output']
-        # check for any commit messages with the prefix
-        commit_count = output.count(commit_prefix)
-        if commit_count > 0:
-            return CHECK.TRUE
-        else:
-            return CHECK.FALSE
+        commit_lines = output.split("\n")
+        commit_lines = [line for line in commit_lines if line.strip() != ""]
+        for line in commit_lines:
+            split_line = line.split(" ", 1)
+            hash = split_line[0]
+            message = split_line[1]
+            if message.startswith(prefix) or prefix == None:
+                commit_dict[hash] = message
     else:
-        return CHECK.UNDETERMINABLE
+        return CHECK.UNDETERMINABLE, None
+
+    if len(commit_dict) > 0:
+        return CHECK.TRUE, commit_dict
+    else:
+        return CHECK.FALSE, None
 
 
 def check_instrument(hostname):
@@ -312,14 +190,16 @@ def check_instrument(hostname):
         dict: A dictionary with the result of the checks.
     """
     # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
-    # pushed_changes_enum = check_for_commits_with_prefix(hostname, "Hotfix:")
-
-    # Check if any unpushed commits run on the instrument
-    unpushed_commits_enum, unpushed_commit_messages = check_for_commits_not_pushed_upstream(
-        hostname, "origin/" + hostname)
+    # hotfix_commits_enum, hotfix_commits_messages = git_log_analyszer(
+    #     hostname, prefix="Hotfix:")
 
     # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old
-    upstream_commits_enum = check_for_unpulled_parents_branch_changes(hostname)
+    # commits_pending_pulling_enum = git_log_analyszer(
+    #     hostname, changes_on=get_parent_branch(hostname), subtracted_against=hostname, prefix=None)
+
+    # Check if any unpushed commits run on the instrument
+    unpushed_commits_enum, unpushed_commit_messages = git_log_analyszer(
+        hostname, changes_on="HEAD", subtracted_against="origin/" + hostname, prefix=None)
 
     # Check if any uncommitted changes run on the instrument
     uncommitted_changes_enum = check_for_uncommitted_changes(hostname)
@@ -331,40 +211,20 @@ def check_instrument(hostname):
     return instrument_status
 
 
-def get_instrument_list():
-    """ Get a list of instruments from the instrument list PV.
-
-    Returns:
-        list: A list of instruments.
-    """
-    instrument_list = ChannelAccessUtils().get_inst_list()
-    if len(instrument_list) == 0:
-        raise IOError(
-            "No instruments found. This is probably because the instrument list PV is unavailable.")
-    else:
-        # Make list just the ['name'] part with 'NDX' in-front of it
-        instrument_list = ["NDX" + instrument['name']
-                           for instrument in instrument_list]
-
-    return instrument_list
-
-
 def check_instruments():
     """ Run checks on all instruments to find hotfix/changes and log the results.
 
     Returns:
         None
         """
-    if USE_TEST_INSTRUMENT_LIST == "true":
+    if USE_TEST_INSTRUMENT_LIST:
         instrument_list = TEST_INSTRUMENT_LIST.split(",")
         instrument_list = [instrument.strip()
                            for instrument in instrument_list]
         if "" in instrument_list:
             instrument_list.remove("")
     else:
-        # instrument_list = get_instrument_list()
-        # instrument_list = getInstsOnLatestIbex()
-        instrument_list = getInstsOnLatestIbexViaInstCongif()
+        instrument_list = get_insts_on_latest_ibex_via_inst_congif()
 
     instrument_status_lists = {"uncommitted_changes": [], "unreachable_at_some_point": [
     ], "unpushed_commits": [], "commits_pending_pulling": []}
@@ -374,7 +234,7 @@ def check_instruments():
             instrument_status = check_instrument(instrument)
             print(f"INFO: Checking {instrument}")
 
-            if DEBUG_MODE == "true":
+            if DEBUG_MODE:
                 print("DEBUG: " + str(instrument_status))
 
             if instrument_status['commits_not_pushed'] == CHECK.TRUE:
@@ -392,8 +252,9 @@ def check_instruments():
                     instrument)
         except Exception as e:
             print(f"ERROR: Could not connect to {instrument} ({str(e)})")
-            instrument_status_lists["unreachable_at_some_point"].append(
-                instrument)
+            if instrument not in instrument_status_lists["unreachable_at_some_point"]:
+                instrument_status_lists["unreachable_at_some_point"].append(
+                    instrument)
 
     print("INFO: Summary of results")
     if len(instrument_status_lists['uncommitted_changes']) > 0:
@@ -408,12 +269,7 @@ def check_instruments():
     else:
         print(
             f"Commits not pushed: {instrument_status_lists['unpushed_commits']}")
-    # if len(instrument_status_lists['commits_pending_pulling']) > 0:
-    #     print(
-    #         f"ERROR: Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
-    # else:
-    #     print(
-    #         f"Commits pending pulling: {instrument_status_lists['commits_pending_pulling']}")
+
     if len(instrument_status_lists['unreachable_at_some_point']) > 0:
         print(
             f"ERROR: Unreachable at some point: {instrument_status_lists['unreachable_at_some_point']}")
@@ -429,6 +285,7 @@ def check_instruments():
     if len(instrument_status_lists["unpushed_commits"]) > 0:
         sys.exit(1)
 
+    # If no instruments have uncommitted changes or are unreachable, exit with ok status
     sys.exit(0)
 
 
