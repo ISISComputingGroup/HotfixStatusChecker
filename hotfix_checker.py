@@ -23,7 +23,7 @@ class CHECK(Enum):
     FALSE = 2
 
 
-def save_to_file(hostname, path, data):
+def save_to_file(path, data):
     """ Save data to a file in the workspace directory.
 
     Args:
@@ -34,10 +34,11 @@ def save_to_file(hostname, path, data):
     Returns:
         None
     """
-    if not os.path.exists(WORKSPACE_DIR + path):
-        os.makedirs(WORKSPACE_DIR + path)
+    # check if the parent dir exists
+    if not os.path.exists(os.path.join(WORKSPACE_DIR + os.path.dirname(path))):
+        os.makedirs(os.path.join(WORKSPACE_DIR + os.path.dirname(path)))
 
-    with open(os.path.join(WORKSPACE_DIR + path + hostname + '.txt'), "w") as file:
+    with open(os.path.join(WORKSPACE_DIR + path), "w") as file:
         file.write(data)
 
 
@@ -63,7 +64,7 @@ def get_insts_on_latest_ibex_via_inst_congif():
 
     # Get the latest version of IBEX
     latest_version = max([inst["version"]
-                         for inst in result_list])
+                          for inst in result_list])
 
     # filter out the instruments that are not on the latest version
     insts_on_latest_ibex = [inst["hostname"] for inst in result_list if
@@ -87,8 +88,7 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         # log the output to a workspace file for viewing later
-
-        save_to_file(hostname, "/git_status/", ssh_process['output'])
+        save_to_file("/git_status/" + hostname + '.txt', ssh_process['output'])
 
         if ssh_process['output'].strip() != "":
             return CHECK.TRUE
