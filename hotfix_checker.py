@@ -8,6 +8,7 @@ import requests
 EPICS_DIR = "C:\\Instrument\\Apps\\EPICS\\"
 SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
 SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
+WORKSPACE_DIR = os.environ["WORKSPACE"]
 
 USE_TEST_INSTRUMENT_LIST = os.environ["USE_TEST_INSTRUMENT_LIST"] == "true"
 TEST_INSTRUMENT_LIST = os.environ["TEST_INSTRUMENT_LIST"]
@@ -20,6 +21,24 @@ class CHECK(Enum):
     UNDETERMINABLE = 0
     TRUE = 1
     FALSE = 2
+
+
+def save_to_file(hostname, path, data):
+    """ Save data to a file in the workspace directory.
+
+    Args:
+        hostname (str): The hostname to connect to.
+        path (str): The path to save the file to.
+        data (str): The data to save to the file.
+
+    Returns:
+        None
+    """
+    if not os.path.exists(WORKSPACE_DIR + path):
+        os.makedirs(WORKSPACE_DIR + path)
+
+    with open(os.path.join(WORKSPACE_DIR + path + hostname + '.txt'), "w") as file:
+        file.write(data)
 
 
 def get_insts_on_latest_ibex_via_inst_congif():
@@ -67,6 +86,10 @@ def check_for_uncommitted_changes(hostname):
         hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
+        # log the output to a workspace file for viewing later
+
+        save_to_file(hostname, "/git_status/", ssh_process['output'])
+
         if ssh_process['output'].strip() != "":
             return CHECK.TRUE
         else:
