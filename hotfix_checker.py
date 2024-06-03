@@ -87,7 +87,8 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         # log the output to a workspace file for viewing later
-        save_to_file("/git_status/" + hostname + '.txt', ssh_process['output'])
+        save_to_file(os.path.join("/git_status/" +
+                     hostname + '.txt'), ssh_process['output'])
 
         if ssh_process['output'].strip() != "":
             return CHECK.TRUE
