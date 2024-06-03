@@ -23,7 +23,7 @@ class CHECK(Enum):
     FALSE = 2
 
 
-def save_to_file(hostname, path, data):
+def save_to_file(path, data):
     """ Save data to a file in the workspace directory.
 
     Args:
@@ -37,7 +37,7 @@ def save_to_file(hostname, path, data):
     if not os.path.exists(WORKSPACE_DIR + path):
         os.makedirs(WORKSPACE_DIR + path)
 
-    with open(os.path.join(WORKSPACE_DIR + path + hostname + '.txt'), "w") as file:
+    with open(os.path.join(WORKSPACE_DIR + path), "w") as file:
         file.write(data)
 
 
@@ -87,8 +87,7 @@ def check_for_uncommitted_changes(hostname):
 
     if ssh_process['success']:
         # log the output to a workspace file for viewing later
-
-        save_to_file(hostname, "/git_status/", ssh_process['output'])
+        save_to_file("/git_status/" + hostname + '.txt', ssh_process['output'])
 
         if ssh_process['output'].strip() != "":
             return CHECK.TRUE
