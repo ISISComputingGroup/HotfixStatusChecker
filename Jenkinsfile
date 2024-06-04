@@ -44,6 +44,7 @@ pipeline {
 
     post {
         always {
+            archiveArtifacts artifacts: '*git_status/*.txt', caseSensitive: false
             logParser([
                 projectRulePath: 'parse_rules',
                 parsingRulesPath: '',

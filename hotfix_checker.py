@@ -8,6 +8,7 @@ import requests
 EPICS_DIR = "C:\\Instrument\\Apps\\EPICS\\"
 SSH_USERNAME = os.environ["SSH_CREDENTIALS_USR"]
 SSH_PASSWORD = os.environ["SSH_CREDENTIALS_PSW"]
+WORKSPACE_DIR = os.environ["WORKSPACE"]
 
 USE_TEST_INSTRUMENT_LIST = os.environ["USE_TEST_INSTRUMENT_LIST"] == "true"
 TEST_INSTRUMENT_LIST = os.environ["TEST_INSTRUMENT_LIST"]
@@ -20,6 +21,25 @@ class CHECK(Enum):
     UNDETERMINABLE = 0
     TRUE = 1
     FALSE = 2
+
+
+def save_to_file(path, data):
+    """ Save data to a file in the workspace directory.
+
+    Args:
+        hostname (str): The hostname to connect to.
+        path (str): The path to save the file to.
+        data (str): The data to save to the file.
+
+    Returns:
+        None
+    """
+    # check if the parent dir exists
+    if not os.path.exists(os.path.join(WORKSPACE_DIR + os.path.dirname(path))):
+        os.makedirs(os.path.join(WORKSPACE_DIR + os.path.dirname(path)))
+
+    with open(os.path.join(WORKSPACE_DIR + path), "w") as file:
+        file.write(data)
 
 
 def get_insts_on_latest_ibex_via_inst_congif():
@@ -44,7 +64,7 @@ def get_insts_on_latest_ibex_via_inst_congif():
 
     # Get the latest version of IBEX
     latest_version = max([inst["version"]
-                         for inst in result_list])
+                          for inst in result_list])
 
     # filter out the instruments that are not on the latest version
     insts_on_latest_ibex = [inst["hostname"] for inst in result_list if
@@ -67,6 +87,9 @@ def check_for_uncommitted_changes(hostname):
         hostname, SSH_USERNAME, SSH_PASSWORD, command)
 
     if ssh_process['success']:
+        # log the output to a workspace file for viewing later
+        save_to_file("/git_status/" + hostname + '.txt', ssh_process['output'])
+
         if ssh_process['output'].strip() != "":
             return CHECK.TRUE
         else:
