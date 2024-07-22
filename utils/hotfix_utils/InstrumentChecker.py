@@ -249,9 +249,9 @@ class InstrumentChecker:
         else:
         # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,  set it to the value of the environment variable assuming user wants custom branch
             upstream_branch = os.environ["UPSTREAM_BRANCH_CONFIG"]
-
-        print("DEBUG: UPSTREAM_BRANCH_CONFIG: ", os.environ["UPSTREAM_BRANCH_CONFIG"])
-        print("DEBUG: UPSTREAM_BRANCH: ", upstream_branch)
+        if os.environ["DEBUG_MODE"] == "true":
+            print("DEBUG: UPSTREAM_BRANCH_CONFIG: ", os.environ["UPSTREAM_BRANCH_CONFIG"])
+            print("DEBUG: UPSTREAM_BRANCH: ", upstream_branch)
 
 
         # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old

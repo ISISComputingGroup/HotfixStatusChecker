@@ -82,6 +82,7 @@ class RepoChecker:
             if "" in instrument_list:
                 instrument_list.remove("")
         else:
+            print("INFO: Getting list of instruments on the 2 latest versions of IBEX")
             instrument_list = self.get_insts_on_latest_ibex_via_inst_congif()
 
         instrument_status_lists = {
