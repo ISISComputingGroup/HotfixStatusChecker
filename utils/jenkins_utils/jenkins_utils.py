@@ -1,7 +1,6 @@
 """Module provides a utility class for interacting with Jenkins."""
 
 import os
-import constants
 
 
 class JenkinsUtils:
@@ -11,6 +10,7 @@ class JenkinsUtils:
     def save_git_status(
         hostname: str,
         status: str,
+        artefact_dir: str,
     ) -> None:
         """Save data to a file in the workspace directory.
 
@@ -24,11 +24,11 @@ class JenkinsUtils:
         """
 
      # log the output to a workspace file for viewing later
-        if not os.path.exists(os.path.join(constants.ARTEFACT_DIR + os.path.dirname("/git_status/"))):
-            os.makedirs(os.path.join(constants.ARTEFACT_DIR + "/git_status/"))
+        if not os.path.exists(os.path.join(artefact_dir + os.path.dirname("/git_status/"))):
+            os.makedirs(os.path.join(artefact_dir + "/git_status/"))
 
         with open(
-            os.path.join(constants.ARTEFACT_DIR + "/git_status/" + hostname + ".txt"),
+            os.path.join(artefact_dir + "/git_status/" + hostname + ".txt"),
             "w",
         ) as file:
             file.write(status)

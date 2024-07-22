@@ -18,7 +18,7 @@ pipeline {
         USE_TEST_INSTRUMENT_LIST = "${USE_TEST_INSTRUMENT_LIST}"
         DEBUG_MODE = "${DEBUG_MODE}"
         REPO_DIR = "C:\\Instrument\\Apps\\EPICS\\"
-        UPSTREAM_BRANCH = "hostname"
+        UPSTREAM_BRANCH_CONFIG = "epics"
     }
 
     stages {
