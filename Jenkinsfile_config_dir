@@ -19,7 +19,7 @@ pipeline {
         DEBUG_MODE = "${DEBUG_MODE}"
         REPO_DIR = "C:\\Instrument\\Settings\\config\\common"
         UPSTREAM_BRANCH_CONFIG = "master"
-        WORKSPACE = "$(WORKSPACE)\\config_job\\"
+        WORKSPACE = "${WORKSPACE}\\config_job\\"
     }
 
     stages {
