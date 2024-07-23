@@ -19,6 +19,7 @@ pipeline {
         DEBUG_MODE = "${DEBUG_MODE}"
         REPO_DIR = "C:\\Instrument\\Apps\\EPICS\\"
         UPSTREAM_BRANCH_CONFIG = "epics"
+        WORKSPACE = "${WORKSPACE}\\epics_job\\"
     }
 
     stages {
@@ -46,7 +47,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '*git_status/*.txt', caseSensitive: false
+            archiveArtifacts artifacts: "epics_job/git_status/*.txt", caseSensitive: false
             logParser([
                 projectRulePath: 'parse_rules',
                 parsingRulesPath: '',
