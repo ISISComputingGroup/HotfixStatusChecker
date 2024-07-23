@@ -140,6 +140,9 @@ class InstrumentChecker:
             fetch_command,
         )
 
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: Running command {fetch_command}")
+
         # if os.environ["DEBUG_MODE"] == "true":
         #     print(f"DEBUG: {ssh_process_fetch}")
 
@@ -235,11 +238,6 @@ class InstrumentChecker:
         else:
             # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,  set it to the value of the environment variable assuming user wants custom branch
             upstream_branch = os.environ["UPSTREAM_BRANCH_CONFIG"]
-        if os.environ["DEBUG_MODE"] == "true":
-            print(
-                "DEBUG: UPSTREAM_BRANCH_CONFIG: ", os.environ["UPSTREAM_BRANCH_CONFIG"]
-            )
-            print("DEBUG: UPSTREAM_BRANCH: ", upstream_branch)
 
         # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old
         (
@@ -276,3 +274,12 @@ class InstrumentChecker:
         # }
 
         # return instrument_status
+
+    def as_string(self) -> str:
+        """Return the Instrument object as a string.
+
+        Returns:
+            str: The Instrument object as a string.
+
+        """
+        return f"Hostname: {self.hostname} - Uncommitted changes: {self.uncommitted_changes_enum} - Commits on local not on upstream: {self.commits_local_not_on_upstream_enum} - Commits on upstream not on local: {self.commits_upstream_not_on_local_enum}"

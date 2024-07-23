@@ -102,6 +102,9 @@ class RepoChecker:
             try:
                 print(f"INFO: Checking {instrument.hostname}")
                 instrument.check_instrument()
+                if os.environ["DEBUG_MODE"] == "true":
+                    print(instrument.as_string())
+
                 if instrument.commits_local_not_on_upstream_enum == CHECK.TRUE:
                     instrument_status_lists["commits_on_local_not_upstream"].append(
                         instrument.hostname
@@ -147,21 +150,7 @@ class RepoChecker:
                         instrument.hostname
                     )
 
-                if instrument.commits_local_not_on_upstream_enum == CHECK.TRUE:
-                    instrument_status_lists["commits_on_local_not_upstream"].append(
-                        instrument.hostname
-                        + " "
-                        + str(instrument.commits_local_not_on_upstream_messages)
-                    )
-                elif (
-                    instrument.commits_local_not_on_upstream_enum
-                    == CHECK.UNDETERMINABLE
-                    and instrument.hostname
-                    not in instrument_status_lists["undeterminable_at_some_point"]
-                ):
-                    instrument_status_lists["undeterminable_at_some_point"].append(
-                        instrument.hostname
-                    )
+              
 
             except Exception as e:
                 print(f"ERROR: Could not connect to {instrument.hostname} ({str(e)})")
@@ -182,12 +171,12 @@ class RepoChecker:
                 f"Uncommitted changes: { instrument_status_lists['uncommitted_changes']}"
             )
         if len(instrument_status_lists["commits_on_local_not_upstream"]) > 0:
-            message_prefix = "ERROR: Commits not pushed:"
+            message_prefix = "ERROR: Commits on local not upstream:"
             print(
                 f"{message_prefix} { instrument_status_lists['commits_on_local_not_upstream']}"
             )
         else:
-            message_prefix = "Commits not pushed:"
+            message_prefix = "Commits on local not upstream:"
             print(
                 f"{message_prefix} {instrument_status_lists['commits_on_local_not_upstream']}"
             )
