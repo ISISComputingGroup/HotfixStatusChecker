@@ -1,3 +1,4 @@
+"""Module containing utility methods for interacting with a PV."""
 import binascii
 import json
 import zlib

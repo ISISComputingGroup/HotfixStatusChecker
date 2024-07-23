@@ -1,6 +1,8 @@
+"""An enumeration of the possible results of a check."""
 from enum import (
     Enum,
 )
+
 
 class CHECK(Enum):
     """An enumeration of the possible results of a check."""

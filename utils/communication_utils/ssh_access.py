@@ -1,15 +1,18 @@
+"""This module provides utilities for SSH access."""
 import paramiko
 
 SSH_PORT = 22
 
 
 class SSHAccessUtils(object):
+    """Class containing utility methods for SSH access."""
+
     @staticmethod
-    def runSSHCommand(
-        host,
-        username,
-        password,
-        command,
+    def run_ssh_commandd(
+        host : str,
+        username : str,
+        password : str,
+        command : str,
     ):
         """Run a command on a remote host using SSH.
 
