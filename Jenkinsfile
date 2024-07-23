@@ -37,7 +37,7 @@ pipeline {
                 echo 'Check Instrument has any Hotfixes and then any uncommitteed changes'
                 timeout(time: 1, unit: 'HOURS') {
                     bat '''
-                        call jenkins_utils/hotfix_checker.bat
+                        call utils/jenkins_utils/hotfix_checker.bat
                     '''
                 }
             }
