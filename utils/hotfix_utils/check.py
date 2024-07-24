@@ -1,4 +1,5 @@
 """An enumeration of the possible results of a check."""
+
 from enum import (
     Enum,
 )

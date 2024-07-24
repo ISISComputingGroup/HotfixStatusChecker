@@ -1,4 +1,5 @@
 """A module for checking the status of an instrument in relation to it's repo."""
+
 import os
 from typing import Union
 
@@ -250,7 +251,6 @@ class InstrumentChecker:
             prefix=None,
         )
 
-
         (
             self.commits_local_not_on_upstream_enum,
             self.commits_local_not_on_upstream_messages,
@@ -263,7 +263,6 @@ class InstrumentChecker:
 
         # Check if any uncommitted changes run on the instrument
         self.uncommitted_changes_enum = self.check_for_uncommitted_changes()
-
 
     def as_string(self) -> str:
         """Return the Instrument object as a string.

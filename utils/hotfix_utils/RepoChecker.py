@@ -1,4 +1,5 @@
 """Contains the RepoChecker class which is used to check the status of a specified repo on an instrument."""
+
 import os
 import sys
 
@@ -20,15 +21,13 @@ class RepoChecker:
     _commits_on_local_not_upstream_key = "commits_on_local_not_upstream"
     _commits_on_upstream_not_local_key = "commits_on_upstream_not_local"
 
-    
-
     def __init__(self) -> None:
         """Initialize the RepoChecker object."""
         self.use_test_inst_list = os.environ["USE_TEST_INSTRUMENT_LIST"] == "true"
         self.test_inst_list = os.environ["TEST_INSTRUMENT_LIST"]
         self.debug_mode = os.environ["DEBUG_MODE"] == "true"
 
-    # you can get the versions of insts a variety of ways, inst config, CS:VERSION:SVN:REV pv etc  
+    # you can get the versions of insts a variety of ways, inst config, CS:VERSION:SVN:REV pv etc
     def get_insts_on_latest_ibex_via_inst_congif(self) -> list:
         """Get a list of instruments that are on the latest version of IBEX.
 
@@ -112,18 +111,22 @@ class RepoChecker:
                     print(instrument.as_string())
 
                 if instrument.commits_local_not_on_upstream_enum == CHECK.TRUE:
-                    instrument_status_lists[self._commits_on_local_not_upstream_key].append(
+                    instrument_status_lists[
+                        self._commits_on_local_not_upstream_key
+                    ].append(
                         f"{instrument.hostname} {instrument.commits_local_not_on_upstream_messages}"
                     )
                 elif (
                     instrument.commits_local_not_on_upstream_enum
                     == CHECK.UNDETERMINABLE
                     and instrument.hostname
-                    not in instrument_status_lists[self._undeterminable_at_some_point_key]
+                    not in instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ]
                 ):
-                    instrument_status_lists[self._undeterminable_at_some_point_key].append(
-                        instrument.hostname
-                    )
+                    instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ].append(instrument.hostname)
 
                 if instrument.uncommitted_changes_enum == CHECK.TRUE:
                     instrument_status_lists[self._uncommitted_changes_key].append(
@@ -132,38 +135,44 @@ class RepoChecker:
                 elif (
                     instrument.uncommitted_changes_enum == CHECK.UNDETERMINABLE
                     and instrument.hostname
-                    not in instrument_status_lists[self._undeterminable_at_some_point_key]
+                    not in instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ]
                 ):
-                    instrument_status_lists[self._undeterminable_at_some_point_key].append(
-                        instrument.hostname
-                    )
+                    instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ].append(instrument.hostname)
 
                 if instrument.commits_upstream_not_on_local_enum == CHECK.TRUE:
-                    instrument_status_lists[self._commits_on_upstream_not_local_key].append(
-    f"{instrument.hostname} {instrument.commits_upstream_not_on_local_messages}"
-)
+                    instrument_status_lists[
+                        self._commits_on_upstream_not_local_key
+                    ].append(
+                        f"{instrument.hostname} {instrument.commits_upstream_not_on_local_messages}"
+                    )
 
                 elif (
                     instrument.commits_upstream_not_on_local_enum
                     == CHECK.UNDETERMINABLE
                     and instrument.hostname
-                    not in instrument_status_lists[self._undeterminable_at_some_point_key]
+                    not in instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ]
                 ):
-                    instrument_status_lists[self._undeterminable_at_some_point_key].append(
-                        instrument.hostname
-                    )
-
-              
+                    instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ].append(instrument.hostname)
 
             except Exception as e:
                 print(f"ERROR: Could not connect to {instrument.hostname} ({str(e)})")
                 if (
                     instrument
-                    not in instrument_status_lists[self._undeterminable_at_some_point_key]
+                    not in instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ]
                 ):
-                    instrument_status_lists[self._undeterminable_at_some_point_key].append(
-                        instrument.hostname
-                    )
+                    instrument_status_lists[
+                        self._undeterminable_at_some_point_key
+                    ].append(instrument.hostname)
 
         print("INFO: Summary of results")
         if len(instrument_status_lists[self._uncommitted_changes_key]) > 0:
@@ -204,13 +213,11 @@ class RepoChecker:
             message_prefix = "undeterminable at some point: "
             print(
                 f"{message_prefix} {instrument_status_lists[self._undeterminable_at_some_point_key]}"
-                _undeterminable_at_some_point_key
             )
 
         for key in instrument_status_lists:
             if len(instrument_status_lists[key]) > 0:
                 sys.exit(1)
-        
 
         # If no instruments have uncommitted changes or are undeterminable,
         # exit with ok status
