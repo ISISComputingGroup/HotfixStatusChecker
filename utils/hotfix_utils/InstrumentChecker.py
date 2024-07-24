@@ -258,7 +258,6 @@ class InstrumentChecker:
         ) = self.git_branch_comparer(
             self.hostname,
             changes_on="HEAD",
-            # subtracted_against="origin/" + self.hostname,
             subtracted_against=upstream_branch,  # for inst scripts repo
             prefix=None,
         )
