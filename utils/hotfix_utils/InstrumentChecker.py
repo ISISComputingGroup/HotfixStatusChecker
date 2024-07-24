@@ -265,14 +265,6 @@ class InstrumentChecker:
         # Check if any uncommitted changes run on the instrument
         self.uncommitted_changes_enum = self.check_for_uncommitted_changes()
 
-        # # return the result of the checks
-        # instrument_status = {
-        #     "commits_not_pushed_messages": commits_local_not_on_upstream_messages,
-        #     "commits_not_pushed": commits_local_not_on_upstream_enum,
-        #     "uncommitted_changes": uncommitted_changes_enum,
-        # }
-
-        # return instrument_status
 
     def as_string(self) -> str:
         """Return the Instrument object as a string.
