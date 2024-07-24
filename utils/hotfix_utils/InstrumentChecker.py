@@ -250,7 +250,6 @@ class InstrumentChecker:
             prefix=None,
         )
 
-        # print(self.commits_upstream_not_on_local_enum, self.commits_upstream_not_on_local_messages)
 
         (
             self.commits_local_not_on_upstream_enum,
