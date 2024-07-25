@@ -69,7 +69,7 @@ class InstrumentChecker:
         if ssh_process["success"]:
             status = ssh_process["output"]
 
-            JenkinsUtils.save_git_status(self.hostname, status, os.environ["WORKSPACE"].replace("/", "\\"))
+            JenkinsUtils.save_git_status(self.hostname, status, os.environ["WORKSPACE"])
 
             if status.strip() != "":
                 return CHECK.TRUE
