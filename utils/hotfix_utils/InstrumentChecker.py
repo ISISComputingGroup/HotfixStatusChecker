@@ -63,9 +63,6 @@ class InstrumentChecker:
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {command}")
 
-        # if os.environ["DEBUG_MODE"] == "true":
-        #     print(f"DEBUG: {ssh_process}")
-
         if ssh_process["success"]:
             status = ssh_process["output"]
 
@@ -132,7 +129,7 @@ class InstrumentChecker:
         else:
             branch_details = ""
 
-        # fetch latest changes from the remote
+        # Fetch latest changes from the remote, NOT PULL
         fetch_command = f"cd {self.repo_dir} && git fetch origin"
         ssh_process_fetch = SSHAccessUtils.run_ssh_commandd(
             hostname,
@@ -144,9 +141,6 @@ class InstrumentChecker:
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {fetch_command}")
 
-        # if os.environ["DEBUG_MODE"] == "true":
-        #     print(f"DEBUG: {ssh_process_fetch}")
-
         if not ssh_process_fetch["success"]:
             return (
                 CHECK.UNDETERMINABLE,
@@ -154,6 +148,7 @@ class InstrumentChecker:
             )
 
         command = f'cd {self.repo_dir} && git log --format="%h %s" {branch_details}'
+
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {command}")
 
@@ -163,9 +158,6 @@ class InstrumentChecker:
             os.environ["SSH_CREDENTIALS_PSW"],
             command,
         )
-
-        # if os.environ["DEBUG_MODE"] == "true":
-        #    print(f"DEBUG: {ssh_process}")
 
         if ssh_process["success"]:
             output = ssh_process["output"]
@@ -211,8 +203,7 @@ class InstrumentChecker:
             if prefix is None or message.startswith(prefix):
                 commit_dict[hash] = message
         return commit_dict
-
-    # TODO: Improve this function to allow selecting of what checks to run and combine the uncommited one to this function
+    
     def check_instrument(self) -> dict:
         """Check if there are any hotfixes or uncommitted changes on AN instrument.
 
@@ -223,9 +214,8 @@ class InstrumentChecker:
         # Examples of how to use the git_branch_comparer function decided to not be used in this iteration of the check
         # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
         # hotfix_commits_enum, hotfix_commits_messages = git_branch_comparer(
-        #     hostname, prefix="Hotfix:")
+        #     hostname, local_branch, upstream_branch, prefix="Hotfix:")
 
-        # Check if any unpushed commits run on the instrument
         upstream_branch = None
         if os.environ["UPSTREAM_BRANCH_CONFIG"] == "hostname":
             upstream_branch = "origin/" + self.hostname
@@ -240,7 +230,7 @@ class InstrumentChecker:
             # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,  set it to the value of the environment variable assuming user wants custom branch
             upstream_branch = os.environ["UPSTREAM_BRANCH_CONFIG"]
 
-        # Check if any upstream commits are not on the instrument, default to the parent origin branch, either main or galil-old
+        # Check if any commits on upstream that are not on the local branch
         (
             self.commits_upstream_not_on_local_enum,
             self.commits_upstream_not_on_local_messages,
@@ -251,17 +241,18 @@ class InstrumentChecker:
             prefix=None,
         )
 
+        # Check if any commits on local branch that are not on the upstream
         (
             self.commits_local_not_on_upstream_enum,
             self.commits_local_not_on_upstream_messages,
         ) = self.git_branch_comparer(
             self.hostname,
             changes_on="HEAD",
-            subtracted_against=upstream_branch,  # for inst scripts repo
+            subtracted_against=upstream_branch,
             prefix=None,
         )
 
-        # Check if any uncommitted changes run on the instrument
+        # Check if any uncommitted changes are on the instrument
         self.uncommitted_changes_enum = self.check_for_uncommitted_changes()
 
     def as_string(self) -> str:
