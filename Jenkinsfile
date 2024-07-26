@@ -19,6 +19,7 @@ pipeline {
         DEBUG_MODE = "${DEBUG_MODE}"
         REPO_DIR = "C:\\Instrument\\Apps\\EPICS\\"
         UPSTREAM_BRANCH_CONFIG = "epics"
+        SHOW_UNCOMMITTED_CHANGES_MESSAGES="false"
     }
 
     stages {

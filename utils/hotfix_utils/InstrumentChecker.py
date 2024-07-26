@@ -1,7 +1,7 @@
 """A module for checking the status of an instrument in relation to it's repo."""
 
 import os
-from typing import Union
+from typing import List, Tuple, Union
 
 from ..communication_utils.ssh_access import (
     SSHAccessUtils,
@@ -31,6 +31,7 @@ class InstrumentChecker:
         self._commits_upstream_not_on_local_enum_messages = None
 
         self._uncommitted_changes_enum = None
+        self._uncommitted_changes_messages = None
 
     @property
     def hostname(self) -> str:
@@ -42,7 +43,7 @@ class InstrumentChecker:
         """
         return self._hostname
 
-    def check_for_uncommitted_changes(self) -> CHECK:
+    def check_for_uncommitted_changes(self) -> Tuple[CHECK, List[any]]:
         """Check if there are any uncommitted changes on the instrument via SSH.
 
         Args:
@@ -68,12 +69,14 @@ class InstrumentChecker:
 
             JenkinsUtils.save_git_status(self.hostname, status, os.environ["WORKSPACE"])
 
-            if status.strip() != "":
-                return CHECK.TRUE
+            if status.strip() != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
+                return CHECK.TRUE, status.strip().split("\n")
+            elif status.strip() != "":
+                return CHECK.TRUE, []
             else:
-                return CHECK.FALSE
+                return CHECK.FALSE, []
         else:
-            return CHECK.UNDETERMINABLE
+            return CHECK.UNDETERMINABLE, []
 
     def get_parent_epics_branch(
         self,
@@ -253,7 +256,7 @@ class InstrumentChecker:
         )
 
         # Check if any uncommitted changes are on the instrument
-        self.uncommitted_changes_enum = self.check_for_uncommitted_changes()
+        self.uncommitted_changes_enum, self.uncommitted_changes_messages = self.check_for_uncommitted_changes()
 
     def as_string(self) -> str:
         """Return the Instrument object as a string.

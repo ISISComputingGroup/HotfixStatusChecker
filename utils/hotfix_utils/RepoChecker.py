@@ -101,7 +101,10 @@ class RepoChecker:
         }
 
         def update_instrument_status_lists(instrument, status_list_key, messages=None):
-            instrument_status_lists[status_list_key].append(f"{instrument.hostname} - {messages}" if messages else instrument.hostname)
+            if messages:
+                instrument_status_lists[status_list_key].append({instrument.hostname : messages})
+            else:
+                instrument_status_lists[status_list_key].append(instrument.hostname)
 
 
         for hostname in instrument_list:
@@ -116,7 +119,7 @@ class RepoChecker:
                     update_instrument_status_lists(instrument, self._commits_on_local_not_upstream_key, instrument.commits_local_not_on_upstream_messages)
                 
                 if instrument.uncommitted_changes_enum == CHECK.TRUE:
-                    update_instrument_status_lists(instrument, self._uncommitted_changes_key)
+                    update_instrument_status_lists(instrument, self._uncommitted_changes_key, instrument.uncommitted_changes_messages)
                 
 
                 if instrument.commits_upstream_not_on_local_enum == CHECK.TRUE:
@@ -129,47 +132,21 @@ class RepoChecker:
                 print(f"ERROR: Could not connect to {instrument.hostname} ({str(e)})")
                 update_instrument_status_lists(instrument, self._undeterminable_at_some_point_key)
 
+        keys_and_prefixes = [
+            (self._uncommitted_changes_key, "Uncommitted changes"),
+            (self._commits_on_local_not_upstream_key, "Commits on local not upstream"),
+            (self._commits_on_upstream_not_local_key, "Commits on upstream not on local"),
+            (self._undeterminable_at_some_point_key, "Undeterminable at some point"),
+]
+
 
         print("INFO: Summary of results")
-        if len(instrument_status_lists[self._uncommitted_changes_key]) > 0:
-            message_prefix = "ERROR: Uncommitted changes:"
-            print(f"{message_prefix} { instrument_status_lists['uncommitted_changes']}")
-        else:
-            print(
-                f"Uncommitted changes: { instrument_status_lists['uncommitted_changes']}"
-            )
-        if len(instrument_status_lists[self._commits_on_local_not_upstream_key]) > 0:
-            message_prefix = "ERROR: Commits on local not upstream:"
-            print(
-                f"{message_prefix} { instrument_status_lists[self._commits_on_local_not_upstream_key]}"
-            )
-        else:
-            message_prefix = "Commits on local not upstream:"
-            print(
-                f"{message_prefix} {instrument_status_lists[self._commits_on_local_not_upstream_key]}"
-            )
-
-        if len(instrument_status_lists[self._commits_on_upstream_not_local_key]) > 0:
-            message_prefix = "ERROR: Commits on upstream not on local:"
-            print(
-                f"{message_prefix} {instrument_status_lists['commits_on_upstream_not_local']}"
-            )
-        else:
-            message_prefix = "Commits on upstream not on local:"
-            print(
-                f"{message_prefix} {instrument_status_lists['commits_on_upstream_not_local']}"
-            )
-
-        if len(instrument_status_lists[self._undeterminable_at_some_point_key]) > 0:
-            message_prefix = "ERROR: undeterminable at some point: "
-            print(
-                f"{message_prefix} {instrument_status_lists[self._undeterminable_at_some_point_key]}"
-            )
-        else:
-            message_prefix = "undeterminable at some point: "
-            print(
-                f"{message_prefix} {instrument_status_lists[self._undeterminable_at_some_point_key]}"
-            )
+        for key, prefix in keys_and_prefixes:
+            status_list = instrument_status_lists[key]
+            if len(status_list) > 0:
+                print(f"ERROR: {prefix}: {status_list}".replace("'", '"'))
+            else:
+                print(f"{prefix}: {status_list}".replace("'", '"'))
 
         for key in instrument_status_lists:
             if len(instrument_status_lists[key]) > 0:
