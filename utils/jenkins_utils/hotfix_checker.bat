@@ -20,13 +20,10 @@ pip install -r requirements.txt
 REM Run the hotfix_checker script 
 python hotfix_checker.py
 
-REM Check for errors and exit with the appropriate error level for Jenkins
-if %errorlevel% neq 0 (
-    deactivate
-    exit /b %errorlevel%
-)
-
 REM Deactivate the virtual environment
 deactivate
+REM Check for errors and exit with the appropriate error level for Jenkins
+exit /b %errorlevel%
+
 
 @endlocal
