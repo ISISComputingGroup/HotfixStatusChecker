@@ -1,4 +1,5 @@
 """This module provides utilities for SSH access."""
+from typing import Dict
 
 import paramiko
 
@@ -14,7 +15,7 @@ class SSHAccessUtils(object):
         username: str,
         password: str,
         command: str,
-    ):
+    ) -> Dict[str, bool | str]:
         """Run a command on a remote host using SSH.
 
         Args:
