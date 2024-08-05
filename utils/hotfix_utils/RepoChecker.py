@@ -28,7 +28,7 @@ class RepoChecker:
         self.debug_mode = os.environ["DEBUG_MODE"] == "true"
 
     # You can get the versions of insts a variety of ways, inst config, CS:VERSION:SVN:REV pv etc
-    def get_insts_on_latest_ibex_via_inst_congif(self) -> list:
+    def get_insts_on_latest_ibex_via_inst_config(self) -> list:
         """Get a list of instruments that are on the latest version of IBEX.
 
         Returns:
@@ -91,7 +91,7 @@ class RepoChecker:
                 instrument_list.remove("")
         else:
             print("INFO: Getting list of instruments on the 2 latest versions of IBEX")
-            instrument_list = self.get_insts_on_latest_ibex_via_inst_congif()
+            instrument_list = self.get_insts_on_latest_ibex_via_inst_config()
 
         instrument_status_lists = {
             self._uncommitted_changes_key: [],
