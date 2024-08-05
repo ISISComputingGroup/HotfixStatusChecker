@@ -4,6 +4,7 @@ import os
 import sys
 
 import requests
+from packaging.version import Version
 
 from utils.hotfix_utils.InstrumentChecker import InstrumentChecker
 
@@ -61,7 +62,7 @@ class RepoChecker:
                     )
 
         # Get the latest versions of IBEX
-        versions = sorted(set([inst["version"] for inst in result_list]))
+        versions = sorted(set([inst["version"] for inst in result_list]), key=Version)
         latest_version = versions[-1]
         second_latest_version = versions[-2]
 
