@@ -69,9 +69,10 @@ class InstrumentChecker:
 
             JenkinsUtils.save_git_status(self.hostname, status, os.environ["WORKSPACE"])
 
-            if status.strip() != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
-                return CHECK.TRUE, status.strip().split("\n")
-            elif status.strip() != "":
+            status_stripped = status.strip()
+            if status_stripped != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
+                return CHECK.TRUE, status_stripped.split("\n")
+            elif status_stripped != "":
                 return CHECK.TRUE, []
             else:
                 return CHECK.FALSE, []
