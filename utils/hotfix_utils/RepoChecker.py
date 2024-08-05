@@ -4,7 +4,7 @@ import os
 import sys
 
 import requests
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 
 from utils.hotfix_utils.InstrumentChecker import InstrumentChecker
 
@@ -40,39 +40,41 @@ class RepoChecker:
         result_list = []
         for instrument in instrument_list:
             if not instrument["seci"]:
-                version = requests.get(
+                version_string = requests.get(
                     "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/"
                     + instrument["hostName"]
                 ).text
-                version_first_number = int(version.strip().split(".")[0])
-                if self.debug_mode:
-                    print(
-                        f"DEBUG: Found instrument {instrument['name']} on IBEX version {version_first_number}"
-                    )
-                if (
-                    version_first_number is not None
-                    and version_first_number != "None"
-                    and version_first_number != ""
-                ):
+                try:
+                    version = Version(version_string)
+
+                    if self.debug_mode:
+                        print(
+                            f"DEBUG: Found instrument {instrument['name']} on IBEX version {version}"
+                        )
                     result_list.append(
                         {
                             "hostname": instrument["hostName"],
-                            "version": version_first_number,
+                            "version": version,
                         }
+                    )
+                except InvalidVersion as e:
+                    print(
+                        f"Could not parse {instrument['name']}'s Version({version_string}): {str(e)}"
                     )
 
         # Get the latest versions of IBEX
-        versions = sorted(set([inst["version"] for inst in result_list]), key=Version)
-        latest_version = versions[-1]
-        second_latest_version = versions[-2]
+        versions = sorted(set([inst["version"] for inst in result_list]))
+
+        latest_major_version = versions[-1].major
+        second_latest_major_version = latest_major_version - 1
+        print(f"INFO: checking versions {latest_major_version}.x.x and {second_latest_major_version}.x.x")
 
         # filter out the instruments that are not on the latest version
         insts_on_latest_ibex = [
             inst["hostname"]
             for inst in result_list
             if (
-                inst["version"] == latest_version
-                or inst["version"] == second_latest_version
+                inst["version"].major in [latest_major_version, second_latest_major_version]
             )
         ]
 
