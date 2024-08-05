@@ -54,7 +54,7 @@ class InstrumentChecker:
 
         """
         command = f"cd {self.repo_dir} && git status --porcelain"
-        ssh_process = SSHAccessUtils.run_ssh_commandd(
+        ssh_process = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
@@ -93,7 +93,7 @@ class InstrumentChecker:
 
         """
         command = f"cd {self.repo_dir} && git log"
-        ssh_process = SSHAccessUtils.run_ssh_commandd(
+        ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
@@ -135,7 +135,7 @@ class InstrumentChecker:
 
         # Fetch latest changes from the remote, NOT PULL
         fetch_command = f"cd {self.repo_dir} && git fetch origin"
-        ssh_process_fetch = SSHAccessUtils.run_ssh_commandd(
+        ssh_process_fetch = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
@@ -156,7 +156,7 @@ class InstrumentChecker:
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {command}")
 
-        ssh_process = SSHAccessUtils.run_ssh_commandd(
+        ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],

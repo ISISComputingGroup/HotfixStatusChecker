@@ -10,7 +10,7 @@ class SSHAccessUtils(object):
     """Class containing utility methods for SSH access."""
 
     @staticmethod
-    def run_ssh_commandd(
+    def run_ssh_command(
         host: str,
         username: str,
         password: str,
