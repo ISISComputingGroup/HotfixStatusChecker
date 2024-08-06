@@ -17,6 +17,9 @@ pipeline {
         TEST_INSTRUMENT_LIST = "${TEST_INSTRUMENT_LIST}"
         USE_TEST_INSTRUMENT_LIST = "${USE_TEST_INSTRUMENT_LIST}"
         DEBUG_MODE = "${DEBUG_MODE}"
+        REPO_DIR = "C:\\Instrument\\Apps\\EPICS\\"
+        UPSTREAM_BRANCH_CONFIG = "epics"
+        SHOW_UNCOMMITTED_CHANGES_MESSAGES="false"
     }
 
     stages {
@@ -35,7 +38,7 @@ pipeline {
                 echo 'Check Instrument has any Hotfixes and then any uncommitteed changes'
                 timeout(time: 1, unit: 'HOURS') {
                     bat '''
-                        call hotfix_checker.bat
+                        call utils/jenkins_utils/hotfix_checker.bat
                     '''
                 }
             }
