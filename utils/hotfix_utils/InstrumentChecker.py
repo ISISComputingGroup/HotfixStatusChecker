@@ -207,7 +207,7 @@ class InstrumentChecker:
             if prefix is None or message.startswith(prefix):
                 commit_dict[hash] = message
         return commit_dict
-    
+
     def check_instrument(self) -> dict:
         """Check if there are any hotfixes or uncommitted changes on AN instrument.
 
@@ -257,7 +257,9 @@ class InstrumentChecker:
         )
 
         # Check if any uncommitted changes are on the instrument
-        self.uncommitted_changes_enum, self.uncommitted_changes_messages = self.check_for_uncommitted_changes()
+        self.uncommitted_changes_enum, self.uncommitted_changes_messages = (
+            self.check_for_uncommitted_changes()
+        )
 
     def as_string(self) -> str:
         """Return the Instrument object as a string.
