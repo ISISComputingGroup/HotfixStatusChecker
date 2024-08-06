@@ -4,7 +4,7 @@ import os
 import sys
 
 import requests
-from packaging.version import Version, InvalidVersion
+from packaging.version import InvalidVersion, Version
 
 from utils.hotfix_utils.InstrumentChecker import InstrumentChecker
 

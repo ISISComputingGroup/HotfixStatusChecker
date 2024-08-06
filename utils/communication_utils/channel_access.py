@@ -9,7 +9,7 @@ from builtins import (
 from enum import (
     Enum,
 )
-from typing import Dict, Any
+from typing import Any, Dict
 
 from genie_python.channel_access_exceptions import (
     ReadAccessException,
