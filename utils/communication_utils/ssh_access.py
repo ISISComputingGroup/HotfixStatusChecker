@@ -1,4 +1,6 @@
 """This module provides utilities for SSH access."""
+from typing import Dict
+
 import paramiko
 
 SSH_PORT = 22
@@ -8,12 +10,12 @@ class SSHAccessUtils(object):
     """Class containing utility methods for SSH access."""
 
     @staticmethod
-    def run_ssh_commandd(
-        host : str,
-        username : str,
-        password : str,
-        command : str,
-    ):
+    def run_ssh_command(
+        host: str,
+        username: str,
+        password: str,
+        command: str,
+    ) -> Dict[str, bool | str]:
         """Run a command on a remote host using SSH.
 
         Args:

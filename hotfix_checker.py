@@ -1,4 +1,5 @@
 """Creates a RepoChecker object and calls the check_instruments method to check for changes in the instruments repository."""
+
 import os
 
 from dotenv import find_dotenv, load_dotenv
@@ -14,12 +15,14 @@ from utils.hotfix_utils.RepoChecker import RepoChecker
 if __name__ == "__main__":
     if os.environ["DEBUG_MODE"] == "true":
         print("INFO: Running in debug mode")
-        print(f"DEBUG: REPO_DIR: {os.environ['REPO_DIR']}")
-        print(f"DEBUG: UPSTREAM_BRANCH: {os.environ['UPSTREAM_BRANCH_CONFIG']}")
-        print(f"DEBUG: ARTEFACT_DIR: {os.environ['WORKSPACE']}")
-        print(f"DEBUG: USE_TEST_INSTRUMENT_LIST: {os.environ['USE_TEST_INSTRUMENT_LIST']}")
-        print(f"DEBUG: TEST_INSTRUMENT_LIST: {os.environ['TEST_INSTRUMENT_LIST']}")
-        print(f"DEBUG: DEBUG_MODE: {os.environ['DEBUG_MODE']}")
+        print(f"INFO: REPO_DIR: {os.environ['REPO_DIR']}")
+        print(f"INFO: UPSTREAM_BRANCH: {os.environ['UPSTREAM_BRANCH_CONFIG']}")
+        print(f"INFO: ARTEFACT_DIR: {os.environ['WORKSPACE']}")
+        print(
+            f"INFO: USE_TEST_INSTRUMENT_LIST: {os.environ['USE_TEST_INSTRUMENT_LIST']}"
+        )
+        print(f"INFO: TEST_INSTRUMENT_LIST: {os.environ['TEST_INSTRUMENT_LIST']}")
+        print(f"INFO: DEBUG_MODE: {os.environ['DEBUG_MODE']}")
 
     repo_checker = RepoChecker()
     repo_checker.check_instruments()
