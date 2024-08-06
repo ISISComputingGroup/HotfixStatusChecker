@@ -9,7 +9,7 @@ from builtins import (
 from enum import (
     Enum,
 )
-from typing import Dict, Any
+from typing import Any, Dict
 
 from genie_python.channel_access_exceptions import (
     ReadAccessException,
@@ -36,7 +36,7 @@ class ChannelAccessUtils(object):
     def get_value(
         self,
         pv,
-    ) ->  str | dict | None:
+    ) -> str | dict | None:
         """Gets the value of the PV. Returns None if PV is unavailable.
         :return: The PV value as a string, or None if there was an error.
         """
@@ -72,9 +72,7 @@ class ChannelAccessUtils(object):
         :return: a list of strings of instrument names.
         """
         pv_value = self.get_value("CS:INSTLIST")
-        return (
-            {} if pv_value is None else json.loads(self._dehex_and_decompress(pv_value))
-        )
+        return {} if pv_value is None else json.loads(self._dehex_and_decompress(pv_value))
 
 
 class PvInterestingLevel(Enum):

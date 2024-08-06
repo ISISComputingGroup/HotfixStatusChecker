@@ -18,9 +18,7 @@ if __name__ == "__main__":
         print(f"INFO: REPO_DIR: {os.environ['REPO_DIR']}")
         print(f"INFO: UPSTREAM_BRANCH: {os.environ['UPSTREAM_BRANCH_CONFIG']}")
         print(f"INFO: ARTEFACT_DIR: {os.environ['WORKSPACE']}")
-        print(
-            f"INFO: USE_TEST_INSTRUMENT_LIST: {os.environ['USE_TEST_INSTRUMENT_LIST']}"
-        )
+        print(f"INFO: USE_TEST_INSTRUMENT_LIST: {os.environ['USE_TEST_INSTRUMENT_LIST']}")
         print(f"INFO: TEST_INSTRUMENT_LIST: {os.environ['TEST_INSTRUMENT_LIST']}")
         print(f"INFO: DEBUG_MODE: {os.environ['DEBUG_MODE']}")
 

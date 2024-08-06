@@ -4,7 +4,7 @@ import os
 import sys
 
 import requests
-from packaging.version import Version, InvalidVersion
+from packaging.version import InvalidVersion, Version
 
 from utils.hotfix_utils.InstrumentChecker import InstrumentChecker
 
@@ -67,15 +67,15 @@ class RepoChecker:
 
         latest_major_version = versions[-1].major
         second_latest_major_version = latest_major_version - 1
-        print(f"INFO: checking versions {latest_major_version}.x.x and {second_latest_major_version}.x.x")
+        print(
+            f"INFO: checking versions {latest_major_version}.x.x and {second_latest_major_version}.x.x"
+        )
 
         # filter out the instruments that are not on the latest version
         insts_on_latest_ibex = [
             inst["hostname"]
             for inst in result_list
-            if (
-                inst["version"].major in [latest_major_version, second_latest_major_version]
-            )
+            if (inst["version"].major in [latest_major_version, second_latest_major_version])
         ]
 
         return insts_on_latest_ibex
@@ -105,10 +105,9 @@ class RepoChecker:
 
         def update_instrument_status_lists(instrument, status_list_key, messages=None):
             if messages:
-                instrument_status_lists[status_list_key].append({instrument.hostname : messages})
+                instrument_status_lists[status_list_key].append({instrument.hostname: messages})
             else:
                 instrument_status_lists[status_list_key].append(instrument.hostname)
-
 
         for hostname in instrument_list:
             instrument = InstrumentChecker(hostname)
@@ -119,17 +118,34 @@ class RepoChecker:
                     print(instrument.as_string())
 
                 if instrument.commits_local_not_on_upstream_enum == CHECK.TRUE:
-                    update_instrument_status_lists(instrument, self._commits_on_local_not_upstream_key, instrument.commits_local_not_on_upstream_messages)
-                
+                    update_instrument_status_lists(
+                        instrument,
+                        self._commits_on_local_not_upstream_key,
+                        instrument.commits_local_not_on_upstream_messages,
+                    )
+
                 if instrument.uncommitted_changes_enum == CHECK.TRUE:
-                    update_instrument_status_lists(instrument, self._uncommitted_changes_key, instrument.uncommitted_changes_messages)
-                
+                    update_instrument_status_lists(
+                        instrument,
+                        self._uncommitted_changes_key,
+                        instrument.uncommitted_changes_messages,
+                    )
 
                 if instrument.commits_upstream_not_on_local_enum == CHECK.TRUE:
-                    update_instrument_status_lists(instrument, self._commits_on_upstream_not_local_key, instrument.commits_upstream_not_on_local_messages)
+                    update_instrument_status_lists(
+                        instrument,
+                        self._commits_on_upstream_not_local_key,
+                        instrument.commits_upstream_not_on_local_messages,
+                    )
 
-                if instrument.commits_local_not_on_upstream_enum == CHECK.UNDETERMINABLE or instrument.uncommitted_changes_enum == CHECK.UNDETERMINABLE or instrument.commits_upstream_not_on_local_enum == CHECK.UNDETERMINABLE:
-                    update_instrument_status_lists(instrument, self._undeterminable_at_some_point_key)
+                if (
+                    instrument.commits_local_not_on_upstream_enum == CHECK.UNDETERMINABLE
+                    or instrument.uncommitted_changes_enum == CHECK.UNDETERMINABLE
+                    or instrument.commits_upstream_not_on_local_enum == CHECK.UNDETERMINABLE
+                ):
+                    update_instrument_status_lists(
+                        instrument, self._undeterminable_at_some_point_key
+                    )
 
             except Exception as e:
                 print(f"ERROR: Could not connect to {instrument.hostname} ({str(e)})")
@@ -140,8 +156,7 @@ class RepoChecker:
             (self._commits_on_local_not_upstream_key, "Commits on local not upstream"),
             (self._commits_on_upstream_not_local_key, "Commits on upstream not on local"),
             (self._undeterminable_at_some_point_key, "Undeterminable at some point"),
-]
-
+        ]
 
         print("INFO: Summary of results")
         for key, prefix in keys_and_prefixes:

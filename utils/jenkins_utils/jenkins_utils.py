@@ -24,9 +24,7 @@ class JenkinsUtils:
 
         """
         # log the output to a workspace file for viewing later
-        if not os.path.exists(
-            os.path.join(artefact_dir, "git_status")
-        ):
+        if not os.path.exists(os.path.join(artefact_dir, "git_status")):
             os.makedirs(os.path.join(artefact_dir, "git_status"))
 
         with open(
