@@ -22,7 +22,9 @@ python hotfix_checker.py
 
 REM Deactivate the virtual environment
 deactivate
-REM Check for errors and exit with the appropriate error level for Jenkins
+REM Remove python, check for errors and exit with the appropriate error level for Jenkins
+
+call \\isis\Shares\ISIS_Experiment_Controls_Public\ibex_utils\installation_and_upgrade\remove_genie_python.bat %LATEST_PYTHON_DIR%
 exit /b %errorlevel%
 
 
