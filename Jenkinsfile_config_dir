@@ -19,6 +19,7 @@ pipeline {
         DEBUG_MODE = "${DEBUG_MODE}"
         REPO_DIR = "C:\\Instrument\\Settings\\config\\common"
         UPSTREAM_BRANCH_CONFIG = "master"
+        SHOW_UNCOMMITTED_CHANGES_MESSAGES="false"
     }
 
     stages {
