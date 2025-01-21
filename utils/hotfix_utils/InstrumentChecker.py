@@ -53,7 +53,17 @@ class InstrumentChecker:
             CHECK: The result of the check.
 
         """
-        command = f"cd {self.repo_dir} && git status --porcelain && echo. && echo. && git --no-pager diff --ignore-cr-at-eol"
+        command = f"cd /d {self.repo_dir} && git status --porcelain"
+        ssh_process = SSHAccessUtils.run_ssh_command(
+            self.hostname,
+            os.environ["SSH_CREDENTIALS_USR"],
+            os.environ["SSH_CREDENTIALS_PSW"],
+            command,
+        )
+
+        print("\n\n")
+
+        command = f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
         ssh_process = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
@@ -92,7 +102,7 @@ class InstrumentChecker:
             str: The name of the parent branch.
 
         """
-        command = f"cd {self.repo_dir} && git log"
+        command = f"cd /d {self.repo_dir} && git log"
         ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
@@ -134,7 +144,7 @@ class InstrumentChecker:
             branch_details = ""
 
         # Fetch latest changes from the remote, NOT PULL
-        fetch_command = f"cd {self.repo_dir} && git fetch origin"
+        fetch_command = f"cd /d {self.repo_dir} && git fetch origin"
         ssh_process_fetch = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
@@ -151,7 +161,7 @@ class InstrumentChecker:
                 None,
             )
 
-        command = f'cd {self.repo_dir} && git log --format="%h %s" {branch_details}'
+        command = f'cd /d {self.repo_dir} && git log --format="%h %s" {branch_details}'
 
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {command}")
