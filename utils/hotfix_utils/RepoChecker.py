@@ -75,7 +75,7 @@ class RepoChecker:
         insts_on_latest_ibex = [
             inst["hostname"]
             for inst in result_list
-            if (inst["version"].major in [latest_major_version, second_latest_major_version])
+            if (inst["version"].major in [latest_major_version, second_latest_major_version, 15, 14])
         ]
 
         return insts_on_latest_ibex
