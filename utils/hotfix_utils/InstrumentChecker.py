@@ -53,7 +53,7 @@ class InstrumentChecker:
             CHECK: The result of the check.
 
         """
-        command = f"cd {self.repo_dir} && git status --porcelain && git diff --ignore-cr-at-eol --no-pager"
+        command = f"cd {self.repo_dir} && git status --porcelain && git --no-pager diff --ignore-cr-at-eol"
         ssh_process = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
