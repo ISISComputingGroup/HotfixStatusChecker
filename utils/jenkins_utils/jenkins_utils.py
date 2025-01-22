@@ -30,5 +30,6 @@ class JenkinsUtils:
         with open(
             os.path.join(artefact_dir, "git_status", f"{hostname}.txt"),
             "w",
+            encoding="utf-8"
         ) as file:
             file.write(status)
