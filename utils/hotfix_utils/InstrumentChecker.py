@@ -61,10 +61,11 @@ class InstrumentChecker:
             command,
         )
 
-        print("\n\n")
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: Running command {command}")
 
         command = f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
-        ssh_process = SSHAccessUtils.run_ssh_command(
+        ssh_process_diff = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
@@ -76,8 +77,11 @@ class InstrumentChecker:
 
         if ssh_process["success"]:
             status = ssh_process["output"]
-
-            JenkinsUtils.save_git_status(self.hostname, status, os.environ["WORKSPACE"])
+            if ssh_process_diff["success"]:
+                status_save = status + "\n\n" + ssh_process_diff["output"]
+            else:
+                status_save = status
+            JenkinsUtils.save_git_status(self.hostname, status_save, os.environ["WORKSPACE"])
 
             status_stripped = status.strip()
             if status_stripped != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
