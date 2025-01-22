@@ -18,7 +18,7 @@ REM Install required packages
 pip install -r requirements.txt
 
 REM Run the hotfix_checker script 
-python hotfix_checker.py
+python -u hotfix_checker.py
 
 REM Deactivate the virtual environment
 deactivate
