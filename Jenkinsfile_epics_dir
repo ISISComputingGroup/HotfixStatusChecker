@@ -12,6 +12,13 @@ pipeline {
         cron('H 8 * * *')
     }
 
+    options {
+        disableConcurrentBuilds()
+        timestamps()
+        // as we "checkout scm" as a stage, we do not need to do it here too
+        skipDefaultCheckout(true)
+    }
+
     environment {
         SSH_CREDENTIALS = credentials('SSH')
         TEST_INSTRUMENT_LIST = "${TEST_INSTRUMENT_LIST}"
@@ -44,7 +51,6 @@ pipeline {
             }
         }
     }
-
     post {
         always {
             archiveArtifacts artifacts: "/git_status/*.txt", caseSensitive: false
