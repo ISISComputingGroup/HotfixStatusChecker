@@ -4,8 +4,6 @@ setlocal
 REM Requires Python3 and python-ssh to be installed in C:\HotfixStatusChecker\Python3 on Jenkins agent
 REM to setup run get_python.bat on the Jenkins agent
 
-set "LATEST_PYTHON3=C:\HotfixStatusChecker\Python3\python3.exe"
-
 REM Check if virtual environment directory exists, if not, create it
 if not exist my_env (
     %LATEST_PYTHON3% -m venv my_env venv --system-site-packages
