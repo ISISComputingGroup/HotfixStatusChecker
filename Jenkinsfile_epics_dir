@@ -47,7 +47,7 @@ pipeline {
                     bat '''
                         call get_python.bat
                         call utils/jenkins_utils/hotfix_checker.bat
-                        call \\\\isis.cclrc.ac.uk\\Shares\\ISIS_Experiment_Controls_Public\\ibex_utils\\installation_and_upgrade\\remove_genie_python.bat
+                        call \\\\isis.cclrc.ac.uk\\Shares\\ISIS_Experiment_Controls_Public\\ibex_utils\\installation_and_upgrade\\remove_genie_python.bat %LATEST_PYTHON_DIR%
                     '''
                 }
             }
