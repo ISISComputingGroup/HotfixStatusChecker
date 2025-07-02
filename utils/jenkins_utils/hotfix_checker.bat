@@ -7,7 +7,7 @@ REM to setup run get_python.bat on the Jenkins agent
 REM Check if virtual environment directory exists, if not, create it
 if not exist my_env (
     @echo Creating python virtual environemnt in my_env
-    %LATEST_PYTHON3% -m venv my_env venv --system-site-packages
+    %LATEST_PYTHON% -m venv my_env venv --system-site-packages
 )
 
 REM Activate the virtual environment
