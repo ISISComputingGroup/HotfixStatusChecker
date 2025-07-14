@@ -2,4 +2,5 @@ paramiko==3.5.1
 python-dotenv==1.1.1
 Requests==2.32.3
 packaging==25.0
+git+https://github.com/ISISComputingGroup/CaChannel
 genie_python
