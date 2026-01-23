@@ -42,7 +42,7 @@ class RepoChecker:
             if not instrument["seci"]:
                 version_string = requests.get(
                     "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/"
-                    + instrument["hostName"]
+                    + instrument["hostName"], verify=false
                 ).text
                 try:
                     version = Version(version_string)
