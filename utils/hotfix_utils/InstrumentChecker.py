@@ -54,35 +54,36 @@ class InstrumentChecker:
 
         """
         command = f"cd /d {self.repo_dir} && git status --porcelain"
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: Running command {command}")
         ssh_process = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
             command,
         )
-
         if os.environ["DEBUG_MODE"] == "true":
-            print(f"DEBUG: Running command {command}")
+            print(f"DEBUG: command result {ssh_process['success']}")
 
         command = f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: Running command {command}")
         ssh_process_diff = SSHAccessUtils.run_ssh_command(
             self.hostname,
             os.environ["SSH_CREDENTIALS_USR"],
             os.environ["SSH_CREDENTIALS_PSW"],
             command,
         )
-
         if os.environ["DEBUG_MODE"] == "true":
-            print(f"DEBUG: Running command {command}")
+            print(f"DEBUG: command result {ssh_process_diff['success']}")
 
         if ssh_process["success"]:
             status = ssh_process["output"]
-            if ssh_process_diff["success"]:
+            if ssh_process_diff["success"] and len(ssh_process_diff["output"].strip()) > 0:
                 status_save = status + "\n\n" + ssh_process_diff["output"]
             else:
                 status_save = status
             JenkinsUtils.save_git_status(self.hostname, status_save, os.environ["WORKSPACE"])
-
             status_stripped = status.strip()
             if status_stripped != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
                 return CHECK.TRUE, status_stripped.split("\n")
@@ -106,7 +107,7 @@ class InstrumentChecker:
             str: The name of the parent branch.
 
         """
-        command = f"cd /d {self.repo_dir} && git log"
+        command = f"cd /d {self.repo_dir} && git log --decorate=short"
         ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
             os.environ["SSH_CREDENTIALS_USR"],
@@ -115,9 +116,12 @@ class InstrumentChecker:
         )
         if ssh_process["success"]:
             if "galil-old" in ssh_process["output"]:
-                return "origin/galil-old"
+                parent_branch = "origin/galil-old"
             else:
-                return "origin/main"
+                parent_branch = "origin/main"
+            if os.environ["DEBUG_MODE"] == "true":
+                print(f"DEBUG: parent epics branch {parent_branch}")
+            return parent_branch
         else:
             return False
 
@@ -158,8 +162,11 @@ class InstrumentChecker:
 
         if os.environ["DEBUG_MODE"] == "true":
             print(f"DEBUG: Running command {fetch_command}")
+        ssh_result = ssh_process_fetch["success"]
 
-        if not ssh_process_fetch["success"]:
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: command result {ssh_result}")
+        if not ssh_result:
             return (
                 CHECK.UNDETERMINABLE,
                 None,
@@ -176,8 +183,11 @@ class InstrumentChecker:
             os.environ["SSH_CREDENTIALS_PSW"],
             command,
         )
+        ssh_result = ssh_process["success"]
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: command result {ssh_result}")
 
-        if ssh_process["success"]:
+        if ssh_result:
             output = ssh_process["output"]
             commit_dict = self.split_git_log(output, prefix)
 
@@ -229,7 +239,8 @@ class InstrumentChecker:
             dict: A dictionary with the result of the checks.
 
         """
-        # Examples of how to use the git_branch_comparer function decided to not be used in this iteration of the check
+        # Examples of how to use the git_branch_comparer function decided to not be
+        # used in this iteration of the check
         # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
         # hotfix_commits_enum, hotfix_commits_messages = git_branch_comparer(
         #     hostname, local_branch, upstream_branch, prefix="Hotfix:")
@@ -245,7 +256,8 @@ class InstrumentChecker:
         elif os.environ["UPSTREAM_BRANCH_CONFIG"] == "master":
             upstream_branch = "origin/master"
         else:
-            # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,  set it to the value of the environment variable assuming user wants custom branch
+            # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,
+            # set it to the value of the environment variable assuming user wants custom branch
             upstream_branch = os.environ["UPSTREAM_BRANCH_CONFIG"]
 
         # Check if any commits on upstream that are not on the local branch
@@ -282,4 +294,9 @@ class InstrumentChecker:
             str: The Instrument object as a string.
 
         """
-        return f"Hostname: {self.hostname} - Uncommitted changes: {self.uncommitted_changes_enum} - Commits on local not on upstream: {self.commits_local_not_on_upstream_enum} - Commits on upstream not on local: {self.commits_upstream_not_on_local_enum}"
+        return (
+            f"Hostname: {self.hostname} - "
+            f"Uncommitted changes: {self.uncommitted_changes_enum} - "
+            f"Commits on local not on upstream: {self.commits_local_not_on_upstream_enum} - "
+            f"Commits on upstream not on local: {self.commits_upstream_not_on_local_enum}"
+        )

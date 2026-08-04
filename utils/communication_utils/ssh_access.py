@@ -36,7 +36,6 @@ class SSHAccessUtils(object):
                 host,
                 port=SSH_PORT,
                 username=username,
-                password=password,
             )
             (
                 stdin,
