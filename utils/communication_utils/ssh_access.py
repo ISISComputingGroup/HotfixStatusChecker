@@ -1,28 +1,28 @@
-"""This module provides utilities for SSH access."""
-
-from typing import Dict
+"""Module provides utilities for SSH access."""
 
 import paramiko
 
 SSH_PORT = 22
 
 
-class SSHAccessUtils(object):
+class SSHAccessUtils:
     """Class containing utility methods for SSH access."""
 
     @staticmethod
     def run_ssh_command(
         host: str,
         username: str,
-        password: str,
+        key_file: str,
+        passphrase: str,
         command: str,
-    ) -> Dict[str, bool | str]:
+    ) -> dict[str, bool | str]:
         """Run a command on a remote host using SSH.
 
         Args:
             host (str): The hostname to connect to.
             username (str): The username to use to connect.
-            password (str): The password to use to connect.
+            key_file (str): The ssh key file to use to connect.
+            passphrase (str): The ssh key passphrase to use.
             command (str): The command to run on the remote host.
 
         Returns:
@@ -36,15 +36,16 @@ class SSHAccessUtils(object):
                 host,
                 port=SSH_PORT,
                 username=username,
-                password=password,
+                key_filename=key_file,
+                passphrase=passphrase,
             )
             (
-                stdin,
+                _stdin,
                 stdout,
                 stderr,
             ) = client.exec_command(command)
-            output = stdout.read().decode("utf-8")
-            error = stderr.read().decode("utf-8")
+            output = stdout.read().decode("utf-8", errors="backslashreplace")
+            error = stderr.read().decode("utf-8", errors="backslashreplace")
             client.close()
             if error:
                 return {
@@ -56,7 +57,7 @@ class SSHAccessUtils(object):
                     "success": True,
                     "output": output,
                 }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             print(str(e))
             return {
                 "success": False,

@@ -1,4 +1,7 @@
-"""Contains the RepoChecker class which is used to check the status of a specified repo on an instrument."""
+"""Contains the RepoChecker class.
+
+This is used to check the status of a specified repo on an instrument.
+"""
 
 import os
 import sys
@@ -6,7 +9,7 @@ import sys
 import requests
 from packaging.version import InvalidVersion, Version
 
-from utils.hotfix_utils.InstrumentChecker import InstrumentChecker
+from utils.hotfix_utils.instrument_checker import InstrumentChecker
 
 from ..communication_utils.channel_access import (
     ChannelAccessUtils,
@@ -27,8 +30,12 @@ class RepoChecker:
         self.use_test_inst_list = os.environ["USE_TEST_INSTRUMENT_LIST"] == "true"
         self.test_inst_list = os.environ["TEST_INSTRUMENT_LIST"]
         self.debug_mode = os.environ["DEBUG_MODE"] == "true"
+        self.ssh_username = os.environ["SSH_CREDENTIALS_USER"]
+        self.ssh_key_file = os.environ["SSH_CREDENTIALS_KEY_FILE"]
+        self.ssh_passphrase = os.environ["SSH_CREDENTIALS_PASSPHRASE"]
 
-    # You can get the versions of insts a variety of ways, inst config, CS:VERSION:SVN:REV pv etc
+    # You can get the versions of insts a variety of ways, inst config,
+    # CS:VERSION:SVN:REV pv etc
     def get_insts_on_latest_ibex_via_inst_config(self) -> list:
         """Get a list of instruments that are on the latest version of IBEX.
 
@@ -41,15 +48,18 @@ class RepoChecker:
         for instrument in instrument_list:
             if not instrument["seci"]:
                 version_string = requests.get(
-                    "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/"
-                    + instrument["hostName"], verify=False
+                    "https://control-svcs.isis.cclrc.ac.uk/git/?p=instconfigs/inst.git;"
+                    "a=blob_plain;f=configurations/config_version.txt;hb=refs/heads/"
+                    + instrument["hostName"],
+                    verify=False,
                 ).text
                 try:
                     version = Version(version_string)
 
                     if self.debug_mode:
                         print(
-                            f"DEBUG: Found instrument {instrument['name']} on IBEX version {version}"
+                            f"DEBUG: Found instrument {instrument['name']} "
+                            f"on IBEX version {version}"
                         )
                     result_list.append(
                         {
@@ -59,23 +69,28 @@ class RepoChecker:
                     )
                 except InvalidVersion as e:
                     print(
-                        f"Could not parse {instrument['name']}'s Version({version_string}): {str(e)}"
+                        f"Could not parse {instrument['name']}'s "
+                        f"Version({version_string}): {e!s}"
                     )
 
         # Get the latest versions of IBEX
-        versions = sorted(set([inst["version"] for inst in result_list]))
+        versions = sorted({inst["version"] for inst in result_list})
 
         latest_major_version = versions[-1].major
         second_latest_major_version = latest_major_version - 1
         print(
-            f"INFO: checking versions {latest_major_version}.x.x and {second_latest_major_version}.x.x"
+            f"INFO: checking versions {latest_major_version}.x.x "
+            f"and {second_latest_major_version}.x.x"
         )
 
         # filter out the instruments that are not on the latest version
         insts_on_latest_ibex = [
             inst["hostname"]
             for inst in result_list
-            if (inst["version"].major in [latest_major_version, second_latest_major_version, 15, 14])
+            if (
+                inst["version"].major
+                in [latest_major_version, second_latest_major_version, 15, 14]
+            )
         ]
 
         return insts_on_latest_ibex
@@ -103,14 +118,22 @@ class RepoChecker:
             self._commits_on_upstream_not_local_key: [],
         }
 
-        def update_instrument_status_lists(instrument, status_list_key, messages=None):
+        def update_instrument_status_lists(
+            instrument: InstrumentChecker,
+            status_list_key: str,
+            messages: list[str] | None = None,
+        ) -> None:
             if messages:
-                instrument_status_lists[status_list_key].append({instrument.hostname: messages})
+                instrument_status_lists[status_list_key].append(
+                    {instrument.hostname: messages}
+                )
             else:
                 instrument_status_lists[status_list_key].append(instrument.hostname)
 
         for hostname in instrument_list:
-            instrument = InstrumentChecker(hostname)
+            instrument = InstrumentChecker(
+                hostname, self.ssh_username, self.ssh_key_file, self.ssh_passphrase
+            )
             try:
                 print(f"INFO: Checking {instrument.hostname}")
                 instrument.check_instrument()
@@ -139,22 +162,29 @@ class RepoChecker:
                     )
 
                 if (
-                    instrument.commits_local_not_on_upstream_enum == CHECK.UNDETERMINABLE
+                    instrument.commits_local_not_on_upstream_enum
+                    == CHECK.UNDETERMINABLE
                     or instrument.uncommitted_changes_enum == CHECK.UNDETERMINABLE
-                    or instrument.commits_upstream_not_on_local_enum == CHECK.UNDETERMINABLE
+                    or instrument.commits_upstream_not_on_local_enum
+                    == CHECK.UNDETERMINABLE
                 ):
                     update_instrument_status_lists(
                         instrument, self._undeterminable_at_some_point_key
                     )
 
-            except Exception as e:
-                print(f"ERROR: Could not connect to {instrument.hostname} ({str(e)})")
-                update_instrument_status_lists(instrument, self._undeterminable_at_some_point_key)
+            except Exception as e:  # noqa: BLE001
+                print(f"ERROR: Could not connect to {instrument.hostname} ({e!s})")
+                update_instrument_status_lists(
+                    instrument, self._undeterminable_at_some_point_key
+                )
 
         keys_and_prefixes = [
             (self._uncommitted_changes_key, "Uncommitted changes"),
             (self._commits_on_local_not_upstream_key, "Commits on local not upstream"),
-            (self._commits_on_upstream_not_local_key, "Commits on upstream not on local"),
+            (
+                self._commits_on_upstream_not_local_key,
+                "Commits on upstream not on local",
+            ),
             (self._undeterminable_at_some_point_key, "Undeterminable at some point"),
         ]
 
@@ -166,10 +196,11 @@ class RepoChecker:
             else:
                 print(f"{prefix}: {status_list}".replace("'", '"'))
 
-        for key in instrument_status_lists:
-            if len(instrument_status_lists[key]) > 0:
+        for key, value in instrument_status_lists.items():
+            if len(value) > 0:
                 sys.exit(1)
 
-        # If no instruments have uncommitted changes, local branch matches upstream branch, and no undeterminable results then
-        # exit with ok status
+        # If no instruments have uncommitted changes,
+        # local branch matches upstream branch,
+        # and no undeterminable results then exit with ok status
         sys.exit(0)
