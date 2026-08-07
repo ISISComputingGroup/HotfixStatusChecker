@@ -1,7 +1,7 @@
 """A module for checking the status of an instrument in relation to it's repo."""
 
 import os
-from typing import List, Tuple, Union
+from typing import Any
 
 from ..communication_utils.ssh_access import (
     SSHAccessUtils,
@@ -15,14 +15,22 @@ class InstrumentChecker:
 
     repo_dir = os.environ["REPO_DIR"]
 
-    def __init__(self, hostname: str) -> None:
+    def __init__(
+        self, hostname: str, ssh_username: str, ssh_key_file: str, ssh_passphrase: str
+    ) -> None:
         """Initialize the Instrument object.
 
         Args:
             hostname (str): The hostname of the instrument.
+            ssh_username (str): The ssh username.
+            ssh_key_file (str): The ssh key file.
+            ssh_passphrase (str): The ssh passphrase.
 
         """
         self._hostname = hostname
+        self._ssh_username = ssh_username
+        self._ssh_key_file = ssh_key_file
+        self._ssh_passphrase = ssh_passphrase
 
         self._commits_local_not_on_upstream_enum = None
         self._commits_local_not_on_upstream_messages = None
@@ -43,7 +51,55 @@ class InstrumentChecker:
         """
         return self._hostname
 
-    def check_for_uncommitted_changes(self) -> Tuple[CHECK, List[any]]:
+    @property
+    def ssh_username(self) -> str:
+        """Get the ssh username for the instrument.
+
+        Returns:
+            str: The ssh username for the instrument.
+
+        """
+        return self._ssh_username
+
+    @property
+    def ssh_key_file(self) -> str:
+        """Get the ssh key file for the instrument.
+
+        Returns:
+            str: The ssh key file for the instrument.
+
+        """
+        return self._ssh_key_file
+
+    @property
+    def ssh_passphrase(self) -> str:
+        """Get the ssh passphrase for the key.
+
+        Returns:
+            str: The ssh passphrase for the key.
+
+        """
+        return self._ssh_passphrase
+
+    def run_ssh_command(self, command: str) -> dict[str, bool | str]:
+        """Run ssh command.
+
+        Returns:
+            dict: command result and output.
+
+        """
+        ssh_out = SSHAccessUtils.run_ssh_command(
+            self.hostname,
+            self.ssh_username,
+            self.ssh_key_file,
+            self.ssh_passphrase,
+            command,
+        )
+        if os.environ["DEBUG_MODE"] == "true":
+            print(f"DEBUG: Running command {command}")
+        return ssh_out
+
+    def check_for_uncommitted_changes(self) -> tuple[CHECK, list[Any]]:
         """Check if there are any uncommitted changes on the instrument via SSH.
 
         Args:
@@ -53,27 +109,27 @@ class InstrumentChecker:
             CHECK: The result of the check.
 
         """
-        command = f"cd /d {self.repo_dir} && git status --porcelain"
-        ssh_process = SSHAccessUtils.run_ssh_command(
-            self.hostname,
-            os.environ["SSH_CREDENTIALS_USR"],
-            os.environ["SSH_CREDENTIALS_PSW"],
-            command,
+        paths_to_exclude = [r"tools\master\cygwin"]
+
+        for path in paths_to_exclude:
+            ssh_out = self.run_ssh_command(f"cd /d {self.repo_dir} && git add {path}")
+            if not ssh_out["success"]:
+                print(f"ERROR running git add {path}: {ssh_out['output']}")
+
+        ssh_process = self.run_ssh_command(
+            f"cd /d {self.repo_dir} && git status --porcelain"
         )
 
-        if os.environ["DEBUG_MODE"] == "true":
-            print(f"DEBUG: Running command {command}")
-
-        command = f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
-        ssh_process_diff = SSHAccessUtils.run_ssh_command(
-            self.hostname,
-            os.environ["SSH_CREDENTIALS_USR"],
-            os.environ["SSH_CREDENTIALS_PSW"],
-            command,
+        ssh_process_diff = self.run_ssh_command(
+            f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
         )
 
-        if os.environ["DEBUG_MODE"] == "true":
-            print(f"DEBUG: Running command {command}")
+        for path in paths_to_exclude:
+            ssh_out = self.run_ssh_command(
+                f"cd /d {self.repo_dir} && git reset -- {path}"
+            )
+            if not ssh_out["success"]:
+                print(f"ERROR running git reset -- {path}: {ssh_out['output']}")
 
         if ssh_process["success"]:
             status = ssh_process["output"]
@@ -81,10 +137,15 @@ class InstrumentChecker:
                 status_save = status + "\n\n" + ssh_process_diff["output"]
             else:
                 status_save = status
-            JenkinsUtils.save_git_status(self.hostname, status_save, os.environ["WORKSPACE"])
+            JenkinsUtils.save_git_status(
+                self.hostname, str(status_save), os.environ["WORKSPACE"]
+            )
 
             status_stripped = status.strip()
-            if status_stripped != "" and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true":
+            if (
+                status_stripped != ""
+                and os.environ["SHOW_UNCOMMITTED_CHANGES_MESSAGES"] == "true"
+            ):
                 return CHECK.TRUE, status_stripped.split("\n")
             elif status_stripped != "":
                 return CHECK.TRUE, []
@@ -96,7 +157,7 @@ class InstrumentChecker:
     def get_parent_epics_branch(
         self,
         hostname: str,
-    ) -> Union[str | bool]:
+    ) -> str | bool:
         """Get the parent branch of the instrument branch.
 
         Args:
@@ -109,8 +170,9 @@ class InstrumentChecker:
         command = f"cd /d {self.repo_dir} && git log"
         ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
-            os.environ["SSH_CREDENTIALS_USR"],
-            os.environ["SSH_CREDENTIALS_PSW"],
+            self.ssh_username,
+            self.ssh_key_file,
+            self.ssh_passphrase,
             command,
         )
         if ssh_process["success"]:
@@ -125,8 +187,8 @@ class InstrumentChecker:
         self,
         hostname: str,
         changes_on: str,
-        subtracted_against: str = None,
-        prefix: str = None,
+        subtracted_against: str | None = None,
+        prefix: str | None = None,
     ) -> CHECK:
         """Get the commit messages between two branches on the instrument.
 
@@ -151,8 +213,9 @@ class InstrumentChecker:
         fetch_command = f"cd /d {self.repo_dir} && git fetch origin"
         ssh_process_fetch = SSHAccessUtils.run_ssh_command(
             hostname,
-            os.environ["SSH_CREDENTIALS_USR"],
-            os.environ["SSH_CREDENTIALS_PSW"],
+            self.ssh_username,
+            self.ssh_key_file,
+            self.ssh_passphrase,
             fetch_command,
         )
 
@@ -172,8 +235,9 @@ class InstrumentChecker:
 
         ssh_process = SSHAccessUtils.run_ssh_command(
             hostname,
-            os.environ["SSH_CREDENTIALS_USR"],
-            os.environ["SSH_CREDENTIALS_PSW"],
+            self.ssh_username,
+            self.ssh_key_file,
+            self.ssh_passphrase,
             command,
         )
 
@@ -203,9 +267,11 @@ class InstrumentChecker:
 
         Args:
             git_log (str): The git log to split.
+            prefix (str): message prefix to match
 
         Returns:
-            dict: A dictionary with the commit hashes as keys and the commit messages as values.
+            dict: A dictionary with the commit hashes as keys and the
+                  commit messages as values.
 
         """
         commit_dict = {}
@@ -229,7 +295,8 @@ class InstrumentChecker:
             dict: A dictionary with the result of the checks.
 
         """
-        # Examples of how to use the git_branch_comparer function decided to not be used in this iteration of the check
+        # Examples of how to use the git_branch_comparer function decided to not
+        # be used in this iteration of the check
         # Check if any hotfixes run on the instrument with the prefix "Hotfix:"
         # hotfix_commits_enum, hotfix_commits_messages = git_branch_comparer(
         #     hostname, local_branch, upstream_branch, prefix="Hotfix:")
@@ -245,7 +312,9 @@ class InstrumentChecker:
         elif os.environ["UPSTREAM_BRANCH_CONFIG"] == "master":
             upstream_branch = "origin/master"
         else:
-            # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,  set it to the value of the environment variable assuming user wants custom branch
+            # if the UPSTREAM_BRANCH_CONFIG is not set to any of the above,
+            # set it to the value of the environment variable assuming user
+            # wants custom branch
             upstream_branch = os.environ["UPSTREAM_BRANCH_CONFIG"]
 
         # Check if any commits on upstream that are not on the local branch
@@ -282,4 +351,11 @@ class InstrumentChecker:
             str: The Instrument object as a string.
 
         """
-        return f"Hostname: {self.hostname} - Uncommitted changes: {self.uncommitted_changes_enum} - Commits on local not on upstream: {self.commits_local_not_on_upstream_enum} - Commits on upstream not on local: {self.commits_upstream_not_on_local_enum}"
+        return (
+            f"Hostname: {self.hostname} - "
+            f"Uncommitted changes: {self.uncommitted_changes_enum} "
+            "- Commits on local not on upstream: "
+            f"{self.commits_local_not_on_upstream_enum} "
+            "- Commits on upstream not on local: "
+            f"{self.commits_upstream_not_on_local_enum}"
+        )

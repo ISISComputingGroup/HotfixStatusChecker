@@ -19,7 +19,6 @@ pipeline {
         skipDefaultCheckout(true)
     }
     environment {
-        SSH_CREDENTIALS = credentials('SSH')
         TEST_INSTRUMENT_LIST = "${TEST_INSTRUMENT_LIST}"
         USE_TEST_INSTRUMENT_LIST = "${USE_TEST_INSTRUMENT_LIST}"
         DEBUG_MODE = "${DEBUG_MODE}"
@@ -42,11 +41,18 @@ pipeline {
         stage('Check Instrument has any Hotfixes and then any uncommitteed changes') {
             steps {
                 echo 'Check Instrument has any commits or any uncommitteed changes'
-                timeout(time: 1, unit: 'HOURS') {
-                    bat '''
-                        call get_python.bat
-                        python -u hotfix_checker.py
-                    '''
+                withCredentials([sshUserPrivateKey(credentialsId: '9f81ea0c-9740-4e2e-b58a-46d426645acb',
+                                                   usernameVariable: 'SSH_CREDENTIALS_USER',
+                                                   passphraseVariable: 'SSH_CREDENTIALS_PASSPHRASE',                                                   
+                                                   keyFileVariable: 'SSH_CREDENTIALS_KEY_FILE')]) {
+                    timeout(time: 1, unit: 'HOURS') {
+                        bat '''
+                            @echo off
+                            setlocal
+                            call get_python.bat
+                            python -u hotfix_checker.py
+                        '''
+                    }
                 }
             }
         }
