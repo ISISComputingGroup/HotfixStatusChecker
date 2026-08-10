@@ -132,8 +132,11 @@ class InstrumentChecker:
                 print(f"ERROR running git reset -- {path}: {ssh_out['output']}")
 
         diff_remote = self.run_ssh_command(
+            r"curl -s -o c:\users\spudulike\hotfix_differ.py "
+            "https://github.com/ISISComputingGroup/HotfixStatusChecker/"
+            "blob/diff_remote/utils/hotfix_utils/differ.py &&"
             r"c:\instrument\apps\python3\python.exe "
-            r"\\isis.cclrc.ac.uk\shares\isis_experiment_controls_public\differ.py"
+            r"c:\users\spudulike\hotfix_differ.py"
         )
         print(diff_remote["output"])
 
