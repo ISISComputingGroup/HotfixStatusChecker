@@ -131,6 +131,12 @@ class InstrumentChecker:
             if not ssh_out["success"]:
                 print(f"ERROR running git reset -- {path}: {ssh_out['output']}")
 
+        diff_remote = self.run_ssh_command(
+            r"c:\instrument\apps\python3\python.exe "
+            r"\\isis.cclrc.ac.uk\shares\isis_experiment_controls_public\differ.py"
+        )
+        print(diff_remote["output"])
+
         if ssh_process["success"]:
             status = ssh_process["output"]
             if ssh_process_diff["success"]:
