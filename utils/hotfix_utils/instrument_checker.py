@@ -133,8 +133,8 @@ class InstrumentChecker:
 
         diff_remote = self.run_ssh_command(
             r"curl -s -o c:\users\spudulike\hotfix_differ.py "
-            "https://github.com/ISISComputingGroup/HotfixStatusChecker/"
-            "blob/diff_remote/utils/hotfix_utils/differ.py &&"
+            "https://raw.githubusercontent.com/ISISComputingGroup/HotfixStatusChecker/"
+            "refs/heads/diff_remote/utils/hotfix_utils/differ.py &&"
             r"c:\instrument\apps\python3\python.exe "
             r"c:\users\spudulike\hotfix_differ.py"
         )
