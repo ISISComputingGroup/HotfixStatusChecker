@@ -138,7 +138,12 @@ class InstrumentChecker:
             r"c:\instrument\apps\python3\python.exe "
             r"c:\users\spudulike\hotfix_differ.py"
         )
-        print(diff_remote["output"])
+        JenkinsUtils.save_git_status(
+            self.hostname,
+            str(diff_remote["output"]),
+            "_remote",
+            os.environ["WORKSPACE"],
+        )
 
         if ssh_process["success"]:
             status = ssh_process["output"]
@@ -147,7 +152,7 @@ class InstrumentChecker:
             else:
                 status_save = status
             JenkinsUtils.save_git_status(
-                self.hostname, str(status_save), os.environ["WORKSPACE"]
+                self.hostname, str(status_save), "", os.environ["WORKSPACE"]
             )
 
             status_stripped = status.strip()

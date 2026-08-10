@@ -10,6 +10,7 @@ class JenkinsUtils:
     def save_git_status(
         hostname: str,
         status: str,
+        file_suffix: str,
         artefact_dir: str,
     ) -> None:
         """Save data to a file in the workspace directory.
@@ -17,6 +18,7 @@ class JenkinsUtils:
         Args:
             hostname (str): The hostname of the Jenkins server.
             status (str): The status to save.
+            file_suffix (str): Suffix for filename.
             artefact_dir (str): The directory to save the status to.
 
         Returns:
@@ -28,7 +30,7 @@ class JenkinsUtils:
             os.makedirs(os.path.join(artefact_dir, "git_status"))
 
         with open(
-            os.path.join(artefact_dir, "git_status", f"{hostname}.txt"),
+            os.path.join(artefact_dir, "git_status", f"{hostname}{file_suffix}.txt"),
             "w",
             encoding="utf-8",
         ) as file:
