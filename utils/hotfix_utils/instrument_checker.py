@@ -109,40 +109,17 @@ class InstrumentChecker:
             CHECK: The result of the check.
 
         """
-        paths_to_exclude = [r"tools\master\cygwin"]
-
+        paths_to_exclude = [r"tools/master/cygwin"]
+        git_pathspec = []
         for path in paths_to_exclude:
-            ssh_out = self.run_ssh_command(f"cd /d {self.repo_dir} && git add {path}")
-            if not ssh_out["success"]:
-                print(f"ERROR running git add {path}: {ssh_out['output']}")
+            git_pathspec.append(f':!{path}')
 
         ssh_process = self.run_ssh_command(
-            f"cd /d {self.repo_dir} && git status --porcelain"
+            f"cd /d {self.repo_dir} && git status --porcelain -- . " + " ".join(git_pathspec)
         )
 
         ssh_process_diff = self.run_ssh_command(
-            f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol"
-        )
-
-        for path in paths_to_exclude:
-            ssh_out = self.run_ssh_command(
-                f"cd /d {self.repo_dir} && git reset -- {path}"
-            )
-            if not ssh_out["success"]:
-                print(f"ERROR running git reset -- {path}: {ssh_out['output']}")
-
-        diff_remote = self.run_ssh_command(
-            r"curl -s -o c:\users\spudulike\hotfix_differ.py "
-            "https://raw.githubusercontent.com/ISISComputingGroup/HotfixStatusChecker/"
-            "refs/heads/diff_remote/utils/hotfix_utils/differ.py &&"
-            r"c:\instrument\apps\python3\python.exe "
-            r"c:\users\spudulike\hotfix_differ.py"
-        )
-        JenkinsUtils.save_git_status(
-            self.hostname,
-            str(diff_remote["output"]),
-            "_remote",
-            os.environ["WORKSPACE"],
+            f"cd /d {self.repo_dir} && git --no-pager diff --ignore-cr-at-eol -- . " + " ".join(git_pathspec)
         )
 
         if ssh_process["success"]:
